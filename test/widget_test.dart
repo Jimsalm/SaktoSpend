@@ -13,8 +13,10 @@ import 'package:budget_tracker/app/app.dart';
 void main() {
   testWidgets('App shell renders', (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: BudgetTrackerApp()));
+    await tester.pump();
 
-    expect(find.text('Shopping Budget Tracker'), findsOneWidget);
-    expect(find.text('No budgets yet'), findsOneWidget);
+    expect(find.text('Overview'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Budgets'), findsOneWidget);
   });
 }

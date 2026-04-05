@@ -10,144 +10,32 @@ class BudgetsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final budgets = ref.watch(budgetListProvider);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shopping Budget Tracker'),
-      ),
-      body: budgets.when(
-        data: (items) {
-          if (items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'No budgets yet',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('Create your first budget to start tracking.'),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () => _openBudgetForm(context, ref),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Create Budget'),
-                  ),
-                ],
+      body: SafeArea(
+        child: ref.watch(budgetListProvider).when(
+              data: (items) => _BudgetWorkspace(
+                items: items,
+                onCreate: () => _openBudgetForm(context, ref),
+                onEdit: (budget) => _openBudgetForm(context, ref, initial: budget),
+                onDelete: (budget) => _deleteBudget(context, ref, budget),
               ),
-            );
-          }
-
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemBuilder: (context, index) {
-              final budget = items[index];
-              final warningAmount = BudgetCalculator.warningThresholdAmount(
-                budgetAmount: budget.amount,
-                warningPercent: budget.warningPercent,
-              );
-              final status = _statusFromBudget(budget);
-
-              return Card(
-                child: ListTile(
-                  onTap: () => _openBudgetForm(context, ref, initial: budget),
-                  title: Text(
-                    budget.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      '${budget.type.name.toUpperCase()}'
-                      '  •  Amount: ${_money(budget.amount)}'
-                      '  •  Reserve: ${_money(budget.reserveAmount)}\n'
-                      'Warn at ${budget.warningPercent.toStringAsFixed(0)}%'
-                      ' (${_money(warningAmount)})'
-                      '  •  ${budget.isActive ? 'Active' : 'Inactive'}',
-                    ),
-                  ),
-                  leading: CircleAvatar(
-                    backgroundColor: _statusColor(status),
-                    child: Icon(
-                      _statusIcon(status),
-                      color: Colors.white,
-                    ),
-                  ),
-                  trailing: PopupMenuButton<_BudgetMenuAction>(
-                    onSelected: (action) async {
-                      if (action == _BudgetMenuAction.edit) {
-                        await _openBudgetForm(context, ref, initial: budget);
-                        return;
-                      }
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Delete budget'),
-                          content: Text('Delete "${budget.name}" permanently?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancel'),
-                            ),
-                            FilledButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Delete'),
-                            ),
-                          ],
-                        ),
-                      );
-                      if (confirm == true && context.mounted) {
-                        await ref
-                            .read(budgetListProvider.notifier)
-                            .deleteBudget(budget.id);
-                      }
-                    },
-                    itemBuilder: (context) => const [
-                      PopupMenuItem(
-                        value: _BudgetMenuAction.edit,
-                        child: Text('Edit'),
-                      ),
-                      PopupMenuItem(
-                        value: _BudgetMenuAction.delete,
-                        child: Text('Delete'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemCount: items.length,
-          );
-        },
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('Failed to load budgets: $error'),
-          ),
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(child: Text('Failed to load budgets: $error')),
+              loading: () => const Center(child: CircularProgressIndicator()),
+            ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openBudgetForm(context, ref),
         icon: const Icon(Icons.add),
-        label: const Text('Budget'),
+        label: const Text('New budget'),
       ),
     );
   }
 
-  Future<void> _openBudgetForm(
-    BuildContext context,
-    WidgetRef ref, {
-    Budget? initial,
-  }) async {
+  Future<void> _openBudgetForm(BuildContext context, WidgetRef ref, {Budget? initial}) async {
     final result = await showDialog<_BudgetFormValue>(
       context: context,
       builder: (context) => _BudgetFormDialog(initial: initial),
     );
-
     if (result == null) {
       return;
     }
@@ -174,34 +62,350 @@ class BudgetsScreen extends ConsumerWidget {
     await ref.read(budgetListProvider.notifier).updateBudget(budget);
   }
 
-  BudgetHealth _statusFromBudget(Budget budget) {
-    return BudgetCalculator.healthFromSpent(
-      budgetAmount: budget.amount,
-      spentAmount: 0,
-      warningPercent: budget.warningPercent,
+  Future<void> _deleteBudget(BuildContext context, WidgetRef ref, Budget budget) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete budget'),
+        content: Text('Delete "${budget.name}" permanently?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+        ],
+      ),
+    );
+    if (confirm == true && context.mounted) {
+      await ref.read(budgetListProvider.notifier).deleteBudget(budget.id);
+    }
+  }
+}
+
+class _BudgetWorkspace extends StatelessWidget {
+  const _BudgetWorkspace({
+    required this.items,
+    required this.onCreate,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final List<Budget> items;
+  final VoidCallback onCreate;
+  final ValueChanged<Budget> onEdit;
+  final ValueChanged<Budget> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final activeCount = items.where((budget) => budget.isActive).length;
+    final totalAmount = items.fold<double>(0, (sum, budget) => sum + budget.amount);
+    final totalReserve = items.fold<double>(0, (sum, budget) => sum + budget.reserveAmount);
+
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+          sliver: SliverToBoxAdapter(child: _PageHeader(onCreate: onCreate)),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          sliver: SliverToBoxAdapter(
+            child: _OverviewRow(
+              totalCount: items.length,
+              activeCount: activeCount,
+              totalAmount: totalAmount,
+              totalReserve: totalReserve,
+            ),
+          ),
+        ),
+        if (items.isEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              child: _EmptyWorkspace(onCreate: onCreate),
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final budget = items[index];
+                final warningAmount = BudgetCalculator.warningThresholdAmount(
+                  budgetAmount: budget.amount,
+                  warningPercent: budget.warningPercent,
+                );
+
+                return Padding(
+                  padding: EdgeInsets.only(bottom: index == items.length - 1 ? 0 : 10),
+                  child: _BudgetBlock(
+                    budget: budget,
+                    warningAmount: warningAmount,
+                    status: _statusFromBudget(budget),
+                    onEdit: () => onEdit(budget),
+                    onDelete: () => onDelete(budget),
+                  ),
+                );
+              }, childCount: items.length),
+            ),
+          ),
+      ],
     );
   }
+}
 
-  Color _statusColor(BudgetHealth status) {
-    switch (status) {
-      case BudgetHealth.safe:
-        return Colors.green;
-      case BudgetHealth.warning:
-        return Colors.orange;
-      case BudgetHealth.exceeded:
-        return Colors.red;
-    }
+class _PageHeader extends StatelessWidget {
+  const _PageHeader({required this.onCreate});
+
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Budgets', style: theme.textTheme.headlineMedium),
+              const SizedBox(height: 6),
+              Text(
+                'A clean workspace for planning shopping spend before each trip.',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        FilledButton.tonalIcon(onPressed: onCreate, icon: const Icon(Icons.add), label: const Text('Add')),
+      ],
+    );
   }
+}
 
-  IconData _statusIcon(BudgetHealth status) {
-    switch (status) {
-      case BudgetHealth.safe:
-        return Icons.check;
-      case BudgetHealth.warning:
-        return Icons.warning_rounded;
-      case BudgetHealth.exceeded:
-        return Icons.error;
-    }
+class _OverviewRow extends StatelessWidget {
+  const _OverviewRow({
+    required this.totalCount,
+    required this.activeCount,
+    required this.totalAmount,
+    required this.totalReserve,
+  });
+
+  final int totalCount;
+  final int activeCount;
+  final double totalAmount;
+  final double totalReserve;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 96,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _OverviewCard(label: 'Budgets', value: '$totalCount'),
+          const SizedBox(width: 8),
+          _OverviewCard(label: 'Active', value: '$activeCount'),
+          const SizedBox(width: 8),
+          _OverviewCard(label: 'Planned', value: _money(totalAmount)),
+          const SizedBox(width: 8),
+          _OverviewCard(label: 'Reserve', value: _money(totalReserve)),
+        ],
+      ),
+    );
+  }
+}
+
+class _OverviewCard extends StatelessWidget {
+  const _OverviewCard({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: SizedBox(
+        width: 142,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: theme.textTheme.bodyMedium),
+              const Spacer(),
+              Text(value, style: theme.textTheme.titleLarge),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyWorkspace extends StatelessWidget {
+  const _EmptyWorkspace({required this.onCreate});
+
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.note_add_outlined, size: 34),
+            const SizedBox(height: 14),
+            Text('No budgets yet', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 6),
+            Text(
+              'Create your first budget and start a focused shopping session.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: onCreate, child: const Text('Create budget')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BudgetBlock extends StatelessWidget {
+  const _BudgetBlock({
+    required this.budget,
+    required this.warningAmount,
+    required this.status,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final Budget budget;
+  final double warningAmount;
+  final BudgetHealth status;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: _statusColor(status),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(_statusIcon(status), color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(budget.name, style: theme.textTheme.titleMedium),
+                      const SizedBox(height: 3),
+                      Text(
+                        budget.isActive ? 'Active budget' : 'Inactive budget',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuButton<_BudgetMenuAction>(
+                  onSelected: (action) => action == _BudgetMenuAction.edit ? onEdit() : onDelete(),
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(value: _BudgetMenuAction.edit, child: Text('Edit')),
+                    PopupMenuItem(value: _BudgetMenuAction.delete, child: Text('Delete')),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _MetaPill(label: budget.type.name.toUpperCase()),
+                _MetaPill(label: 'Amount ${_money(budget.amount)}'),
+                _MetaPill(label: 'Reserve ${_money(budget.reserveAmount)}'),
+                _MetaPill(
+                  label:
+                      'Warning ${budget.warningPercent.toStringAsFixed(0)}% (${_money(warningAmount)})',
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '${_dateLabel(budget.startDate)} to ${_dateLabel(budget.endDate)}',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MetaPill extends StatelessWidget {
+  const _MetaPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      label: Text(label),
+    );
+  }
+}
+
+BudgetHealth _statusFromBudget(Budget budget) {
+  if (budget.spendableAmount <= 0) {
+    return BudgetHealth.exceeded;
+  }
+  if (!budget.isActive) {
+    return BudgetHealth.warning;
+  }
+  return BudgetHealth.safe;
+}
+
+Color _statusColor(BudgetHealth status) {
+  switch (status) {
+    case BudgetHealth.safe:
+      return const Color(0xFF5F7D60);
+    case BudgetHealth.warning:
+      return const Color(0xFF946C3D);
+    case BudgetHealth.exceeded:
+      return const Color(0xFF8A403A);
+  }
+}
+
+IconData _statusIcon(BudgetHealth status) {
+  switch (status) {
+    case BudgetHealth.safe:
+      return Icons.check;
+    case BudgetHealth.warning:
+      return Icons.pause;
+    case BudgetHealth.exceeded:
+      return Icons.close;
   }
 }
 
@@ -288,27 +492,19 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
                 DropdownButtonFormField<BudgetType>(
                   value: _type,
                   items: BudgetType.values
-                      .map(
-                        (type) => DropdownMenuItem(
-                          value: type,
-                          child: Text(type.name),
-                        ),
-                      )
+                      .map((type) => DropdownMenuItem(value: type, child: Text(type.name)))
                       .toList(),
                   onChanged: (value) {
-                    if (value == null) {
-                      return;
+                    if (value != null) {
+                      setState(() => _type = value);
                     }
-                    setState(() => _type = value);
                   },
                   decoration: const InputDecoration(labelText: 'Budget type'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: const InputDecoration(labelText: 'Budget amount'),
                   validator: (value) {
                     final parsed = double.tryParse(value ?? '');
@@ -321,9 +517,7 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _reserveController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: const InputDecoration(labelText: 'Reserve amount'),
                   validator: (value) {
                     final parsed = double.tryParse(value ?? '');
@@ -336,12 +530,8 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _warningController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: 'Warning threshold (%)',
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(labelText: 'Warning threshold (%)'),
                   validator: (value) {
                     final parsed = double.tryParse(value ?? '');
                     if (parsed == null || parsed < 0 || parsed > 100) {
@@ -384,9 +574,7 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
                       context: context,
                       firstDate: _startDate,
                       lastDate: DateTime(2100),
-                      initialDate: _endDate.isBefore(_startDate)
-                          ? _startDate
-                          : _endDate,
+                      initialDate: _endDate.isBefore(_startDate) ? _startDate : _endDate,
                     );
                     if (picked != null) {
                       setState(() => _endDate = picked);
@@ -399,14 +587,8 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _onSubmit,
-          child: Text(isEditing ? 'Save' : 'Create'),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        FilledButton(onPressed: _onSubmit, child: Text(isEditing ? 'Save' : 'Create')),
       ],
     );
   }
@@ -422,25 +604,24 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
 
     if (reserve > amount) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Reserve amount cannot be greater than budget amount.'),
-        ),
+        const SnackBar(content: Text('Reserve amount cannot be greater than budget amount.')),
       );
       return;
     }
 
-    final payload = _BudgetFormValue(
-      name: _nameController.text,
-      type: _type,
-      amount: amount,
-      reserveAmount: reserve,
-      warningPercent: warning,
-      startDate: _startDate,
-      endDate: _endDate,
-      isActive: _isActive,
+    Navigator.pop(
+      context,
+      _BudgetFormValue(
+        name: _nameController.text,
+        type: _type,
+        amount: amount,
+        reserveAmount: reserve,
+        warningPercent: warning,
+        startDate: _startDate,
+        endDate: _endDate,
+        isActive: _isActive,
+      ),
     );
-
-    Navigator.pop(context, payload);
   }
 }
 

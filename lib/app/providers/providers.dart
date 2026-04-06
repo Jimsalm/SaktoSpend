@@ -1,5 +1,6 @@
 import 'package:budget_tracker/data/db/app_database.dart';
 import 'package:budget_tracker/data/repositories/budget_repository_local.dart';
+import 'package:budget_tracker/data/repositories/session_cart_repository_local.dart';
 import 'package:budget_tracker/domain/entities/budget.dart';
 import 'package:budget_tracker/domain/repositories/budget_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,14 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
 
 final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
   return BudgetRepositoryLocal(database: ref.watch(appDatabaseProvider));
+});
+
+final sessionCartRepositoryProvider = Provider<SessionCartRepositoryLocal>((ref) {
+  return SessionCartRepositoryLocal(database: ref.watch(appDatabaseProvider));
+});
+
+final sessionCartTotalsProvider = FutureProvider<Map<String, double>>((ref) async {
+  return ref.watch(sessionCartRepositoryProvider).getTotalsByBudget();
 });
 
 final budgetListProvider =

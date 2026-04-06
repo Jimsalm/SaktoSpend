@@ -1,3 +1,6 @@
+# adb exec-out run-as com.example.budget_tracker cat databases/budget_tracker.db > budget_tracker.db
+
+
 # Shopping Budget Tracker for Android (Flutter)
 
 ## Overview

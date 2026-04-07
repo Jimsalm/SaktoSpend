@@ -5,6 +5,7 @@ class AppDatabase {
   static const _dbName = 'budget_tracker.db';
   static const _dbVersion = 1;
   static const budgetsTable = 'budgets';
+  static const sessionCartItemsTable = 'session_cart_items';
 
   Database? _database;
 
@@ -29,23 +30,50 @@ class AppDatabase {
     return openDatabase(
       path,
       version: _dbVersion,
+      onDowngrade: onDatabaseDowngradeDelete,
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
       onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE $budgetsTable(
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            type TEXT NOT NULL,
-            amount REAL NOT NULL,
-            reserve_amount REAL NOT NULL,
-            warning_percent REAL NOT NULL,
-            start_date TEXT NOT NULL,
-            end_date TEXT NOT NULL,
-            is_active INTEGER NOT NULL,
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
-          )
-        ''');
+        await _createBudgetsTable(db);
+        await _createSessionCartItemsTable(db);
       },
     );
+  }
+
+  Future<void> _createBudgetsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $budgetsTable(
+        id TEXT PRIMARY KEY CHECK(length(trim(id)) > 0),
+        name TEXT NOT NULL CHECK(length(trim(name)) > 0),
+        type TEXT NOT NULL CHECK(type IN ('shopping', 'weekly', 'monthly')),
+        amount INTEGER NOT NULL CHECK(amount > 0),
+        warning_percent REAL NOT NULL CHECK(warning_percent >= 0 AND warning_percent <= 100),
+        is_active INTEGER NOT NULL CHECK(is_active IN (0, 1)),
+        created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
+        updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
+      )
+    ''');
+  }
+
+  Future<void> _createSessionCartItemsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $sessionCartItemsTable(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        budget_id TEXT NOT NULL CHECK(length(trim(budget_id)) > 0),
+        name TEXT NOT NULL CHECK(length(trim(name)) > 0),
+        category TEXT NOT NULL CHECK(length(trim(category)) > 0),
+        unit_price INTEGER NOT NULL CHECK(unit_price >= 0),
+        quantity INTEGER NOT NULL CHECK(quantity > 0),
+        unit TEXT NOT NULL DEFAULT 'PC' CHECK(unit IN ('PC', 'KG')),
+        is_essential INTEGER NOT NULL DEFAULT 0 CHECK(is_essential IN (0, 1)),
+        created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
+        FOREIGN KEY (budget_id) REFERENCES $budgetsTable(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_${sessionCartItemsTable}_budget_id
+      ON $sessionCartItemsTable(budget_id)
+    ''');
   }
 }

@@ -1,7 +1,7 @@
 import 'package:budget_tracker/data/db/app_database.dart';
 import 'package:budget_tracker/data/models/budget_model.dart';
-import 'package:budget_tracker/domain/entities/budget.dart';
-import 'package:budget_tracker/domain/repositories/budget_repository.dart';
+import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:budget_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:sqflite/sqflite.dart';
 
 class BudgetRepositoryLocal implements BudgetRepository {
@@ -11,6 +11,7 @@ class BudgetRepositoryLocal implements BudgetRepository {
 
   @override
   Future<void> createBudget(Budget budget) async {
+    _validateBudget(budget);
     final db = await _database.instance;
     final model = BudgetModel.fromDomain(budget);
     await db.insert(
@@ -22,11 +23,12 @@ class BudgetRepositoryLocal implements BudgetRepository {
 
   @override
   Future<void> deleteBudget(String budgetId) async {
+    _validateBudgetId(budgetId);
     final db = await _database.instance;
     await db.delete(
       AppDatabase.budgetsTable,
       where: 'id = ?',
-      whereArgs: [budgetId],
+      whereArgs: [budgetId.trim()],
     );
   }
 
@@ -42,6 +44,7 @@ class BudgetRepositoryLocal implements BudgetRepository {
 
   @override
   Future<void> updateBudget(Budget budget) async {
+    _validateBudget(budget);
     final db = await _database.instance;
     final model = BudgetModel.fromDomain(budget);
     await db.update(
@@ -51,5 +54,32 @@ class BudgetRepositoryLocal implements BudgetRepository {
       whereArgs: [budget.id],
       conflictAlgorithm: ConflictAlgorithm.abort,
     );
+  }
+
+  void _validateBudget(Budget budget) {
+    _validateBudgetId(budget.id);
+    if (budget.name.trim().isEmpty) {
+      throw ArgumentError.value(budget.name, 'budget.name', 'Budget name is required');
+    }
+    if (budget.amount <= 0) {
+      throw ArgumentError.value(
+        budget.amount,
+        'budget.amount',
+        'Budget amount must be greater than zero',
+      );
+    }
+    if (budget.warningPercent < 0 || budget.warningPercent > 100) {
+      throw ArgumentError.value(
+        budget.warningPercent,
+        'budget.warningPercent',
+        'Warning percent must be between 0 and 100',
+      );
+    }
+  }
+
+  void _validateBudgetId(String budgetId) {
+    if (budgetId.trim().isEmpty) {
+      throw ArgumentError.value(budgetId, 'budgetId', 'Budget id is required');
+    }
   }
 }

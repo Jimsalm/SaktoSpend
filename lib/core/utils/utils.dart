@@ -1,1 +1,1 @@
-/// Shared utility helpers will be added here.
+export 'money_utils.dart';

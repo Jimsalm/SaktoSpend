@@ -39,7 +39,14 @@ class BudgetRepositoryLocal implements BudgetRepository {
       AppDatabase.budgetsTable,
       orderBy: 'updated_at DESC',
     );
-    return rows.map((row) => BudgetModel.fromMap(row).toDomain()).toList();
+
+    final now = DateTime.now();
+    return rows.map((row) => BudgetModel.fromMap(row).toDomain()).where((
+      budget,
+    ) {
+      final createdAt = budget.createdAt.toLocal();
+      return createdAt.year == now.year && createdAt.month == now.month;
+    }).toList();
   }
 
   @override
@@ -59,7 +66,11 @@ class BudgetRepositoryLocal implements BudgetRepository {
   void _validateBudget(Budget budget) {
     _validateBudgetId(budget.id);
     if (budget.name.trim().isEmpty) {
-      throw ArgumentError.value(budget.name, 'budget.name', 'Budget name is required');
+      throw ArgumentError.value(
+        budget.name,
+        'budget.name',
+        'Budget name is required',
+      );
     }
     if (budget.amount <= 0) {
       throw ArgumentError.value(

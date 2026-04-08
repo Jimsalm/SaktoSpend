@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   const AppTheme._();
@@ -16,12 +17,8 @@ class AppTheme {
       brightness: Brightness.light,
       surface: surface,
     );
-
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: colorScheme,
-      scaffoldBackgroundColor: bg,
-      textTheme: const TextTheme(
+    final textTheme = GoogleFonts.manropeTextTheme(
+      const TextTheme(
         headlineMedium: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.w700,
@@ -43,6 +40,13 @@ class AppTheme {
         bodyMedium: TextStyle(fontSize: 14, color: muted, height: 1.3),
         labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       ),
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: bg,
+      textTheme: textTheme,
       cardTheme: CardThemeData(
         color: surface,
         surfaceTintColor: Colors.transparent,
@@ -92,11 +96,17 @@ class AppTheme {
         selectedColor: const Color(0xFFE9E6DE),
         side: const BorderSide(color: border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-        labelStyle: const TextStyle(
-          fontSize: 12,
-          color: text,
-          fontWeight: FontWeight.w500,
-        ),
+        labelStyle:
+            textTheme.bodyMedium?.copyWith(
+              fontSize: 12,
+              color: text,
+              fontWeight: FontWeight.w500,
+            ) ??
+            const TextStyle(
+              fontSize: 12,
+              color: text,
+              fontWeight: FontWeight.w500,
+            ),
       ),
     );
   }

@@ -1,9 +1,13 @@
 import 'package:budget_tracker/data/db/app_database.dart';
 import 'package:budget_tracker/data/repositories/budget_repository_local.dart';
+import 'package:budget_tracker/data/repositories/history_repository_local.dart';
 import 'package:budget_tracker/data/repositories/session_cart_repository_local.dart';
 import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:budget_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:budget_tracker/features/budgets/domain/usecases/usecases.dart';
+import 'package:budget_tracker/features/history/domain/entities/history_overview.dart';
+import 'package:budget_tracker/features/history/domain/repositories/history_repository.dart';
+import 'package:budget_tracker/features/history/domain/usecases/usecases.dart';
 import 'package:budget_tracker/features/shopping_session/domain/repositories/session_cart_repository.dart';
 import 'package:budget_tracker/features/shopping_session/domain/usecases/usecases.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +24,10 @@ final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
 
 final sessionCartRepositoryProvider = Provider<SessionCartRepository>((ref) {
   return SessionCartRepositoryLocal(database: ref.watch(appDatabaseProvider));
+});
+
+final historyRepositoryProvider = Provider<HistoryRepository>((ref) {
+  return HistoryRepositoryLocal(database: ref.watch(appDatabaseProvider));
 });
 
 final getBudgetsUseCaseProvider = Provider<GetBudgetsUseCase>((ref) {
@@ -64,8 +72,18 @@ final getSessionCartTotalsUseCaseProvider =
       );
     });
 
+final getHistoryOverviewUseCaseProvider = Provider<GetHistoryOverviewUseCase>((
+  ref,
+) {
+  return GetHistoryOverviewUseCase(ref.watch(historyRepositoryProvider));
+});
+
 final sessionCartTotalsProvider = FutureProvider<Map<String, int>>((ref) async {
   return ref.watch(getSessionCartTotalsUseCaseProvider).call();
+});
+
+final historyOverviewProvider = FutureProvider<HistoryOverview>((ref) async {
+  return ref.watch(getHistoryOverviewUseCaseProvider).call();
 });
 
 final budgetListProvider =
@@ -74,18 +92,18 @@ final budgetListProvider =
     );
 
 class BudgetListNotifier extends AsyncNotifier<List<Budget>> {
-  late final GetBudgetsUseCase _getBudgetsUseCase;
-  late final CreateBudgetUseCase _createBudgetUseCase;
-  late final UpdateBudgetUseCase _updateBudgetUseCase;
-  late final DeleteBudgetUseCase _deleteBudgetUseCase;
+  GetBudgetsUseCase get _getBudgetsUseCase =>
+      ref.read(getBudgetsUseCaseProvider);
+  CreateBudgetUseCase get _createBudgetUseCase =>
+      ref.read(createBudgetUseCaseProvider);
+  UpdateBudgetUseCase get _updateBudgetUseCase =>
+      ref.read(updateBudgetUseCaseProvider);
+  DeleteBudgetUseCase get _deleteBudgetUseCase =>
+      ref.read(deleteBudgetUseCaseProvider);
 
   @override
   Future<List<Budget>> build() async {
-    _getBudgetsUseCase = ref.watch(getBudgetsUseCaseProvider);
-    _createBudgetUseCase = ref.watch(createBudgetUseCaseProvider);
-    _updateBudgetUseCase = ref.watch(updateBudgetUseCaseProvider);
-    _deleteBudgetUseCase = ref.watch(deleteBudgetUseCaseProvider);
-    return _getBudgetsUseCase.call();
+    return ref.watch(getBudgetsUseCaseProvider).call();
   }
 
   Future<void> addBudget(Budget budget) async {

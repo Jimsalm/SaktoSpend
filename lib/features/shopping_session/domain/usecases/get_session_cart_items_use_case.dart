@@ -1,5 +1,5 @@
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
-import 'package:budget_tracker/features/shopping_session/domain/repositories/session_cart_repository.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/repositories/session_cart_repository.dart';
 
 class GetSessionCartItemsUseCase {
   const GetSessionCartItemsUseCase(this._repository);

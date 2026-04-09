@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class EmptyBudgetsCard extends StatelessWidget {
-  const EmptyBudgetsCard({
-    super.key,
-    required this.onCreatePressed,
-  });
+  const EmptyBudgetsCard({super.key, required this.onCreatePressed});
 
   final VoidCallback onCreatePressed;
 
@@ -55,6 +52,7 @@ class EmptyBudgetsCard extends StatelessWidget {
           ),
           Text(
             'No Active Budgets',
+            textAlign: TextAlign.center,
             style: theme.textTheme.titleLarge?.copyWith(
               fontSize: 44,
               fontWeight: FontWeight.w700,

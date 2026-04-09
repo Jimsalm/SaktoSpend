@@ -1,4 +1,4 @@
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
 import 'package:flutter/material.dart';
 
 class SessionCartList extends StatelessWidget {

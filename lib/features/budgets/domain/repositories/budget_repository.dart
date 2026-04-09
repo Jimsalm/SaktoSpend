@@ -1,4 +1,4 @@
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
 
 abstract class BudgetRepository {
   Future<List<Budget>> getBudgets();

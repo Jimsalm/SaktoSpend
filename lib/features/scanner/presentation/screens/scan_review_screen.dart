@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';

@@ -8,7 +8,7 @@ class HistoryEmptyCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+        padding: const EdgeInsets.fromLTRB(40, 30, 40, 30),
         child: Column(
           children: [
             const Icon(

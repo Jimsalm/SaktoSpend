@@ -1,4 +1,4 @@
-import 'package:budget_tracker/features/history/domain/entities/history_item.dart';
+import 'package:SaktoSpend/features/history/domain/entities/history_item.dart';
 
 class HistoryMonthSection {
   const HistoryMonthSection({

@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:budget_tracker/app/providers/providers.dart';
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/budgets/presentation/screens/budgets_tab_screen.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
-import 'package:budget_tracker/features/dashboard/presentation/screens/dashboard_screen.dart';
-import 'package:budget_tracker/features/history/presentation/screens/history_screen.dart';
-import 'package:budget_tracker/features/scanner/presentation/screens/scan_review_screen.dart';
-import 'package:budget_tracker/features/settings/presentation/screens/settings_screen.dart';
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
-import 'package:budget_tracker/features/shopping_session/presentation/screens/active_session_screen.dart';
+import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/budgets/presentation/screens/budgets_tab_screen.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:SaktoSpend/features/history/presentation/screens/history_screen.dart';
+import 'package:SaktoSpend/features/scanner/presentation/screens/scan_review_screen.dart';
+import 'package:SaktoSpend/features/settings/presentation/screens/settings_screen.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/features/shopping_session/presentation/screens/active_session_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -359,10 +359,12 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
       return null;
     }
 
-    final budgetWarning = _selectedBudget?.warningPercent ?? _primaryWarningLevel;
-    final warningPercent = (budgetWarning <= 0 ? _primaryWarningLevel : budgetWarning)
-        .clamp(0.0, 100.0)
-        .toDouble();
+    final budgetWarning =
+        _selectedBudget?.warningPercent ?? _primaryWarningLevel;
+    final warningPercent =
+        (budgetWarning <= 0 ? _primaryWarningLevel : budgetWarning)
+            .clamp(0.0, 100.0)
+            .toDouble();
     final threshold = warningPercent / 100;
     final previousUtilization = (previousSpent / budgetAmount).clamp(0.0, 1.0);
     final nextUtilization = (nextSpent / budgetAmount).clamp(0.0, 1.0);

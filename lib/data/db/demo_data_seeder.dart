@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:budget_tracker/data/db/app_database.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/data/db/app_database.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
 
 class DemoDataSeeder {
   const DemoDataSeeder._();
@@ -47,7 +47,8 @@ class DemoDataSeeder {
         final itemCount = random.nextInt(5) + 4;
         final monthDays = _daysInMonth(seedBudget.monthDate);
         for (var i = 0; i < itemCount; i++) {
-          final template = _productTemplates[random.nextInt(_productTemplates.length)];
+          final template =
+              _productTemplates[random.nextInt(_productTemplates.length)];
           final quantity = template.unit == 'KG'
               ? (random.nextInt(3) + 1)
               : (random.nextInt(5) + 1);

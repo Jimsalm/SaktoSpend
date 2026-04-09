@@ -1,8 +1,8 @@
-import 'package:budget_tracker/data/db/app_database.dart';
-import 'package:budget_tracker/data/models/user_profile_model.dart';
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/settings/domain/entities/user_profile.dart';
-import 'package:budget_tracker/features/settings/domain/repositories/settings_repository.dart';
+import 'package:SaktoSpend/data/db/app_database.dart';
+import 'package:SaktoSpend/data/models/user_profile_model.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/settings/domain/entities/user_profile.dart';
+import 'package:SaktoSpend/features/settings/domain/repositories/settings_repository.dart';
 import 'package:sqflite/sqflite.dart';
 
 class SettingsRepositoryLocal implements SettingsRepository {
@@ -58,7 +58,9 @@ class SettingsRepositoryLocal implements SettingsRepository {
       AppDatabase.userProfileTable,
       columns: const ['created_at'],
       where: 'id = ?',
-      whereArgs: [profile.id.trim().isEmpty ? _defaultUserId : profile.id.trim()],
+      whereArgs: [
+        profile.id.trim().isEmpty ? _defaultUserId : profile.id.trim(),
+      ],
       limit: 1,
     );
 
@@ -70,7 +72,9 @@ class SettingsRepositoryLocal implements SettingsRepository {
     final normalized = UserProfileModel(
       id: profile.id.trim().isEmpty ? _defaultUserId : profile.id.trim(),
       name: profile.name.trim().isEmpty ? _defaultName : profile.name.trim(),
-      email: profile.email.trim().isEmpty ? _defaultEmail : profile.email.trim(),
+      email: profile.email.trim().isEmpty
+          ? _defaultEmail
+          : profile.email.trim(),
       imageUrl: profile.imageUrl.trim(),
       createdAt: createdAt ?? now,
       updatedAt: now,
@@ -108,22 +112,20 @@ class SettingsRepositoryLocal implements SettingsRepository {
     }
 
     final defaultCode = MoneyUtils.defaultCurrencyCode;
-    await db.insert(
-      AppDatabase.appSettingsTable,
-      {'key': _currencyCodeKey, 'value': defaultCode},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(AppDatabase.appSettingsTable, {
+      'key': _currencyCodeKey,
+      'value': defaultCode,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     return defaultCode;
   }
 
   @override
   Future<void> saveCurrencyCode(String currencyCode) async {
     final db = await _database.instance;
-    await db.insert(
-      AppDatabase.appSettingsTable,
-      {'key': _currencyCodeKey, 'value': MoneyUtils.normalizeCurrencyCode(currencyCode)},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(AppDatabase.appSettingsTable, {
+      'key': _currencyCodeKey,
+      'value': MoneyUtils.normalizeCurrencyCode(currencyCode),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
@@ -138,11 +140,10 @@ class SettingsRepositoryLocal implements SettingsRepository {
     );
 
     if (rows.isEmpty) {
-      await db.insert(
-        AppDatabase.appSettingsTable,
-        {'key': _hardBudgetModeKey, 'value': '1'},
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.insert(AppDatabase.appSettingsTable, {
+        'key': _hardBudgetModeKey,
+        'value': '1',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       return true;
     }
 
@@ -153,11 +154,10 @@ class SettingsRepositoryLocal implements SettingsRepository {
   @override
   Future<void> saveHardBudgetMode(bool enabled) async {
     final db = await _database.instance;
-    await db.insert(
-      AppDatabase.appSettingsTable,
-      {'key': _hardBudgetModeKey, 'value': enabled ? '1' : '0'},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(AppDatabase.appSettingsTable, {
+      'key': _hardBudgetModeKey,
+      'value': enabled ? '1' : '0',
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
@@ -172,11 +172,10 @@ class SettingsRepositoryLocal implements SettingsRepository {
     );
 
     if (rows.isEmpty) {
-      await db.insert(
-        AppDatabase.appSettingsTable,
-        {'key': _spendingThresholdAlertsKey, 'value': '1'},
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.insert(AppDatabase.appSettingsTable, {
+        'key': _spendingThresholdAlertsKey,
+        'value': '1',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       return true;
     }
 
@@ -187,11 +186,10 @@ class SettingsRepositoryLocal implements SettingsRepository {
   @override
   Future<void> saveSpendingThresholdAlertsEnabled(bool enabled) async {
     final db = await _database.instance;
-    await db.insert(
-      AppDatabase.appSettingsTable,
-      {'key': _spendingThresholdAlertsKey, 'value': enabled ? '1' : '0'},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(AppDatabase.appSettingsTable, {
+      'key': _spendingThresholdAlertsKey,
+      'value': enabled ? '1' : '0',
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
@@ -207,11 +205,10 @@ class SettingsRepositoryLocal implements SettingsRepository {
 
     if (rows.isEmpty) {
       const defaultLevel = 80.0;
-      await db.insert(
-        AppDatabase.appSettingsTable,
-        {'key': _primaryWarningLevelKey, 'value': defaultLevel.toStringAsFixed(1)},
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.insert(AppDatabase.appSettingsTable, {
+        'key': _primaryWarningLevelKey,
+        'value': defaultLevel.toStringAsFixed(1),
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       return defaultLevel;
     }
 
@@ -223,11 +220,10 @@ class SettingsRepositoryLocal implements SettingsRepository {
   Future<void> savePrimaryWarningLevel(double level) async {
     final db = await _database.instance;
     final normalized = _normalizeWarningLevel(level);
-    await db.insert(
-      AppDatabase.appSettingsTable,
-      {'key': _primaryWarningLevelKey, 'value': normalized.toStringAsFixed(1)},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(AppDatabase.appSettingsTable, {
+      'key': _primaryWarningLevelKey,
+      'value': normalized.toStringAsFixed(1),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
@@ -242,11 +238,10 @@ class SettingsRepositoryLocal implements SettingsRepository {
     );
 
     if (rows.isEmpty) {
-      await db.insert(
-        AppDatabase.appSettingsTable,
-        {'key': _ocrScannerEnabledKey, 'value': '1'},
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.insert(AppDatabase.appSettingsTable, {
+        'key': _ocrScannerEnabledKey,
+        'value': '1',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       return true;
     }
 
@@ -257,11 +252,10 @@ class SettingsRepositoryLocal implements SettingsRepository {
   @override
   Future<void> saveOcrScannerEnabled(bool enabled) async {
     final db = await _database.instance;
-    await db.insert(
-      AppDatabase.appSettingsTable,
-      {'key': _ocrScannerEnabledKey, 'value': enabled ? '1' : '0'},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(AppDatabase.appSettingsTable, {
+      'key': _ocrScannerEnabledKey,
+      'value': enabled ? '1' : '0',
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   double _normalizeWarningLevel(double level) {

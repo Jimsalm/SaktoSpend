@@ -1,4 +1,4 @@
-import 'package:budget_tracker/features/settings/domain/repositories/settings_repository.dart';
+import 'package:SaktoSpend/features/settings/domain/repositories/settings_repository.dart';
 
 class GetOcrScannerEnabledUseCase {
   const GetOcrScannerEnabledUseCase(this._repository);

@@ -8,11 +8,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:budget_tracker/app/app.dart';
+import 'package:SaktoSpend/app/app.dart';
 
 void main() {
   testWidgets('App shell renders', (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: BudgetTrackerApp()));
+    await tester.pumpWidget(const ProviderScope(child: SaktoSpendApp()));
     await tester.pump();
 
     expect(find.text('Overview'), findsOneWidget);

@@ -1,12 +1,12 @@
-import 'package:budget_tracker/app/providers/providers.dart';
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/history/domain/entities/history_item.dart'
+import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/history/domain/entities/history_item.dart'
     as history_domain;
-import 'package:budget_tracker/features/history/domain/entities/history_overview.dart';
-import 'package:budget_tracker/features/history/presentation/screens/history_budget_detail_screen.dart';
-import 'package:budget_tracker/features/history/presentation/widgets/history_empty_card.dart';
-import 'package:budget_tracker/features/history/presentation/widgets/history_month_section.dart';
-import 'package:budget_tracker/features/history/presentation/widgets/history_search_empty_card.dart';
+import 'package:SaktoSpend/features/history/domain/entities/history_overview.dart';
+import 'package:SaktoSpend/features/history/presentation/screens/history_budget_detail_screen.dart';
+import 'package:SaktoSpend/features/history/presentation/widgets/history_empty_card.dart';
+import 'package:SaktoSpend/features/history/presentation/widgets/history_month_section.dart';
+import 'package:SaktoSpend/features/history/presentation/widgets/history_search_empty_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

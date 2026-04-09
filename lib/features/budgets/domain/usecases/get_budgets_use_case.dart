@@ -1,5 +1,5 @@
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
-import 'package:budget_tracker/features/budgets/domain/repositories/budget_repository.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/features/budgets/domain/repositories/budget_repository.dart';
 
 class GetBudgetsUseCase {
   const GetBudgetsUseCase(this._repository);

@@ -1,11 +1,11 @@
-import 'package:budget_tracker/app/providers/providers.dart';
-import 'package:budget_tracker/app/router/app_router.dart';
-import 'package:budget_tracker/core/theme/app_theme.dart';
+import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/app/router/app_router.dart';
+import 'package:SaktoSpend/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BudgetTrackerApp extends ConsumerWidget {
-  const BudgetTrackerApp({super.key});
+class SaktoSpendApp extends ConsumerWidget {
+  const SaktoSpendApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

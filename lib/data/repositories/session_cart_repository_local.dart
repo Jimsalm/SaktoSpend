@@ -1,7 +1,7 @@
-import 'package:budget_tracker/data/db/app_database.dart';
-import 'package:budget_tracker/data/models/session_cart_item_model.dart';
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
-import 'package:budget_tracker/features/shopping_session/domain/repositories/session_cart_repository.dart';
+import 'package:SaktoSpend/data/db/app_database.dart';
+import 'package:SaktoSpend/data/models/session_cart_item_model.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/repositories/session_cart_repository.dart';
 import 'package:sqflite/sqflite.dart';
 
 class SessionCartRepositoryLocal implements SessionCartRepository {

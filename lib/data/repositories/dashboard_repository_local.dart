@@ -1,7 +1,7 @@
-import 'package:budget_tracker/data/db/app_database.dart';
-import 'package:budget_tracker/features/dashboard/domain/entities/dashboard_overview.dart';
-import 'package:budget_tracker/features/dashboard/domain/entities/dashboard_recent_session.dart';
-import 'package:budget_tracker/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:SaktoSpend/data/db/app_database.dart';
+import 'package:SaktoSpend/features/dashboard/domain/entities/dashboard_overview.dart';
+import 'package:SaktoSpend/features/dashboard/domain/entities/dashboard_recent_session.dart';
+import 'package:SaktoSpend/features/dashboard/domain/repositories/dashboard_repository.dart';
 
 class DashboardRepositoryLocal implements DashboardRepository {
   DashboardRepositoryLocal({required AppDatabase database})

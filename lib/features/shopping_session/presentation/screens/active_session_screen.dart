@@ -1,11 +1,11 @@
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
-import 'package:budget_tracker/features/shopping_session/presentation/widgets/cart_entry_sheet.dart';
-import 'package:budget_tracker/features/shopping_session/presentation/widgets/empty_cart_placeholder.dart';
-import 'package:budget_tracker/features/shopping_session/presentation/widgets/remaining_budget_card.dart';
-import 'package:budget_tracker/features/shopping_session/presentation/widgets/session_cart_list.dart';
-import 'package:budget_tracker/features/shopping_session/presentation/widgets/voice_entry_sheet.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/features/shopping_session/presentation/widgets/cart_entry_sheet.dart';
+import 'package:SaktoSpend/features/shopping_session/presentation/widgets/empty_cart_placeholder.dart';
+import 'package:SaktoSpend/features/shopping_session/presentation/widgets/remaining_budget_card.dart';
+import 'package:SaktoSpend/features/shopping_session/presentation/widgets/session_cart_list.dart';
+import 'package:SaktoSpend/features/shopping_session/presentation/widgets/voice_entry_sheet.dart';
 import 'package:flutter/material.dart';
 
 class ActiveSessionScreen extends StatelessWidget {

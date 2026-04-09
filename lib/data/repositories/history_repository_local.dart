@@ -1,8 +1,8 @@
-import 'package:budget_tracker/data/db/app_database.dart';
-import 'package:budget_tracker/features/history/domain/entities/history_item.dart';
-import 'package:budget_tracker/features/history/domain/entities/history_month_section.dart';
-import 'package:budget_tracker/features/history/domain/entities/history_overview.dart';
-import 'package:budget_tracker/features/history/domain/repositories/history_repository.dart';
+import 'package:SaktoSpend/data/db/app_database.dart';
+import 'package:SaktoSpend/features/history/domain/entities/history_item.dart';
+import 'package:SaktoSpend/features/history/domain/entities/history_month_section.dart';
+import 'package:SaktoSpend/features/history/domain/entities/history_overview.dart';
+import 'package:SaktoSpend/features/history/domain/repositories/history_repository.dart';
 
 class HistoryRepositoryLocal implements HistoryRepository {
   HistoryRepositoryLocal({required AppDatabase database})

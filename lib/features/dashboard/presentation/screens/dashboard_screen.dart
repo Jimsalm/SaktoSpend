@@ -1,10 +1,10 @@
-import 'package:budget_tracker/app/providers/providers.dart';
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/dashboard/domain/entities/entities.dart';
-import 'package:budget_tracker/features/dashboard/presentation/widgets/dashboard_avoidable_spend_card.dart';
-import 'package:budget_tracker/features/dashboard/presentation/widgets/dashboard_recent_sessions_section.dart';
-import 'package:budget_tracker/features/dashboard/presentation/widgets/dashboard_spending_insights_card.dart';
-import 'package:budget_tracker/features/dashboard/presentation/widgets/dashboard_total_spent_card.dart';
+import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/dashboard/domain/entities/entities.dart';
+import 'package:SaktoSpend/features/dashboard/presentation/widgets/dashboard_avoidable_spend_card.dart';
+import 'package:SaktoSpend/features/dashboard/presentation/widgets/dashboard_recent_sessions_section.dart';
+import 'package:SaktoSpend/features/dashboard/presentation/widgets/dashboard_spending_insights_card.dart';
+import 'package:SaktoSpend/features/dashboard/presentation/widgets/dashboard_total_spent_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,9 +21,8 @@ class DashboardScreen extends ConsumerWidget {
     final overviewAsync = ref.watch(_dashboardViewDataProvider);
 
     return overviewAsync.when(
-      loading: () => const SafeArea(
-        child: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const SafeArea(child: Center(child: CircularProgressIndicator())),
       error: (error, _) => SafeArea(
         child: Center(
           child: Padding(
@@ -69,7 +68,11 @@ class DashboardScreen extends ConsumerWidget {
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(Icons.person, color: Colors.white, size: 28),
+                    child: const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                 ],
               ),

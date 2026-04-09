@@ -1,5 +1,5 @@
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
 
 class BudgetModel {
   const BudgetModel({

@@ -1,5 +1,5 @@
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
 import 'package:flutter/material.dart';
 
 Future<SessionCartItem?> showCartEntrySheet(
@@ -360,32 +360,32 @@ Future<SessionCartItem?> showCartEntrySheet(
                       onPressed: exceedsHardLimit
                           ? null
                           : () async {
-                        final rawName = name.trim();
-                        final nameValue = rawName.isEmpty
-                            ? 'Manual Item'
-                            : rawName;
-                        final price = _parseEntryPrice(priceText);
-                        if (price < 0) {
-                          return;
-                        }
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        await Future<void>.delayed(
-                          const Duration(milliseconds: 10),
-                        );
-                        if (context.mounted) {
-                          Navigator.pop(
-                            context,
-                            initialItem.copyWith(
-                              name: nameValue,
-                              category: category,
-                              unitPrice: price,
-                              quantity: quantity,
-                              unit: unit,
-                              isEssential: isEssential,
-                            ),
-                          );
-                        }
-                      },
+                              final rawName = name.trim();
+                              final nameValue = rawName.isEmpty
+                                  ? 'Manual Item'
+                                  : rawName;
+                              final price = _parseEntryPrice(priceText);
+                              if (price < 0) {
+                                return;
+                              }
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              await Future<void>.delayed(
+                                const Duration(milliseconds: 10),
+                              );
+                              if (context.mounted) {
+                                Navigator.pop(
+                                  context,
+                                  initialItem.copyWith(
+                                    name: nameValue,
+                                    category: category,
+                                    unitPrice: price,
+                                    quantity: quantity,
+                                    unit: unit,
+                                    isEssential: isEssential,
+                                  ),
+                                );
+                              }
+                            },
                       style: FilledButton.styleFrom(
                         backgroundColor: Colors.black,
                         foregroundColor: Colors.white,

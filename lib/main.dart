@@ -1,5 +1,5 @@
-import 'package:budget_tracker/app/app.dart';
-import 'package:budget_tracker/data/db/db.dart';
+import 'package:SaktoSpend/app/app.dart';
+import 'package:SaktoSpend/data/db/db.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,5 +20,5 @@ Future<void> main() async {
     }
   }
 
-  runApp(const ProviderScope(child: BudgetTrackerApp()));
+  runApp(const ProviderScope(child: SaktoSpendApp()));
 }

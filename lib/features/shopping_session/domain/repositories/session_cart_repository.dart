@@ -1,4 +1,4 @@
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
 
 abstract class SessionCartRepository {
   Future<List<SessionCartItem>> getItemsForBudget(String budgetId);

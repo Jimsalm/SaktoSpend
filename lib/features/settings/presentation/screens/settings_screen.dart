@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:budget_tracker/app/providers/providers.dart';
-import 'package:budget_tracker/core/utils/utils.dart';
+import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -425,10 +425,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          profileEmail.trim().isEmpty ? 'No email' : profileEmail,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: const Color(0xFF5F5A52),
-                          ),
+                          profileEmail.trim().isEmpty
+                              ? 'No email'
+                              : profileEmail,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: const Color(0xFF5F5A52)),
                         ),
                       ],
                     ),
@@ -471,7 +472,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       backgroundColor: const Color(0xFFE6E2D9),
                       backgroundImage: imageProvider,
                       child: imageProvider == null
-                          ? const Icon(Icons.person, color: Color(0xFF5D574D), size: 30)
+                          ? const Icon(
+                              Icons.person,
+                              color: Color(0xFF5D574D),
+                              size: 30,
+                            )
                           : null,
                     ),
                     Positioned(
@@ -511,9 +516,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 6),
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter full name',
-                ),
+                decoration: const InputDecoration(hintText: 'Enter full name'),
               ),
               const SizedBox(height: 12),
               Text(

@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:budget_tracker/app/providers/providers.dart';
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
-import 'package:budget_tracker/features/budgets/presentation/widgets/budget_allocation_card.dart';
-import 'package:budget_tracker/features/budgets/presentation/widgets/budget_overview_card.dart';
-import 'package:budget_tracker/features/budgets/presentation/widgets/empty_budgets_card.dart';
+import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/features/budgets/presentation/widgets/budget_allocation_card.dart';
+import 'package:SaktoSpend/features/budgets/presentation/widgets/budget_overview_card.dart';
+import 'package:SaktoSpend/features/budgets/presentation/widgets/empty_budgets_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -357,10 +357,7 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
 }
 
 class _BudgetFormDialog extends StatefulWidget {
-  const _BudgetFormDialog({
-    this.initial,
-    required this.defaultWarningPercent,
-  });
+  const _BudgetFormDialog({this.initial, required this.defaultWarningPercent});
 
   final Budget? initial;
   final double defaultWarningPercent;
@@ -474,7 +471,8 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
                                           decimal: true,
                                         ),
                                     decoration: InputDecoration(
-                                      prefixText: '${MoneyUtils.currencySymbol} ',
+                                      prefixText:
+                                          '${MoneyUtils.currencySymbol} ',
                                       hintText: '0.00',
                                     ),
                                     validator: (value) {

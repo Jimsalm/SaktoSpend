@@ -1,5 +1,5 @@
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
 import 'package:flutter/material.dart';
 
 class HistoryBudgetDetailRow extends StatelessWidget {

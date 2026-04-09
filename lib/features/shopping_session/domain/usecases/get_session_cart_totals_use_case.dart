@@ -1,4 +1,4 @@
-import 'package:budget_tracker/features/shopping_session/domain/repositories/session_cart_repository.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/repositories/session_cart_repository.dart';
 
 class GetSessionCartTotalsUseCase {
   const GetSessionCartTotalsUseCase(this._repository);

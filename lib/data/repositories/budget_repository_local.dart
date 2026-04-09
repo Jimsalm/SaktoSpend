@@ -1,7 +1,7 @@
-import 'package:budget_tracker/data/db/app_database.dart';
-import 'package:budget_tracker/data/models/budget_model.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
-import 'package:budget_tracker/features/budgets/domain/repositories/budget_repository.dart';
+import 'package:SaktoSpend/data/db/app_database.dart';
+import 'package:SaktoSpend/data/models/budget_model.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:sqflite/sqflite.dart';
 
 class BudgetRepositoryLocal implements BudgetRepository {

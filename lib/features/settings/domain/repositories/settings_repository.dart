@@ -1,4 +1,4 @@
-import 'package:budget_tracker/features/settings/domain/entities/user_profile.dart';
+import 'package:SaktoSpend/features/settings/domain/entities/user_profile.dart';
 
 abstract class SettingsRepository {
   Future<UserProfile> getUserProfile();

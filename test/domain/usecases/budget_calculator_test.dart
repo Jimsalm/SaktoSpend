@@ -1,5 +1,5 @@
-import 'package:budget_tracker/features/budgets/domain/entities/budget_health.dart';
-import 'package:budget_tracker/features/budgets/domain/usecases/budget_calculator.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget_health.dart';
+import 'package:SaktoSpend/features/budgets/domain/usecases/budget_calculator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

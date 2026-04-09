@@ -1,24 +1,24 @@
-import 'package:budget_tracker/data/db/app_database.dart';
-import 'package:budget_tracker/data/repositories/budget_repository_local.dart';
-import 'package:budget_tracker/data/repositories/dashboard_repository_local.dart';
-import 'package:budget_tracker/data/repositories/history_repository_local.dart';
-import 'package:budget_tracker/data/repositories/settings_repository_local.dart';
-import 'package:budget_tracker/data/repositories/session_cart_repository_local.dart';
-import 'package:budget_tracker/core/utils/utils.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
-import 'package:budget_tracker/features/budgets/domain/repositories/budget_repository.dart';
-import 'package:budget_tracker/features/budgets/domain/usecases/usecases.dart';
-import 'package:budget_tracker/features/dashboard/domain/entities/dashboard_overview.dart';
-import 'package:budget_tracker/features/dashboard/domain/repositories/dashboard_repository.dart';
-import 'package:budget_tracker/features/dashboard/domain/usecases/usecases.dart';
-import 'package:budget_tracker/features/history/domain/entities/history_overview.dart';
-import 'package:budget_tracker/features/history/domain/repositories/history_repository.dart';
-import 'package:budget_tracker/features/history/domain/usecases/usecases.dart';
-import 'package:budget_tracker/features/settings/domain/entities/user_profile.dart';
-import 'package:budget_tracker/features/settings/domain/repositories/settings_repository.dart';
-import 'package:budget_tracker/features/settings/domain/usecases/usecases.dart';
-import 'package:budget_tracker/features/shopping_session/domain/repositories/session_cart_repository.dart';
-import 'package:budget_tracker/features/shopping_session/domain/usecases/usecases.dart';
+import 'package:SaktoSpend/data/db/app_database.dart';
+import 'package:SaktoSpend/data/repositories/budget_repository_local.dart';
+import 'package:SaktoSpend/data/repositories/dashboard_repository_local.dart';
+import 'package:SaktoSpend/data/repositories/history_repository_local.dart';
+import 'package:SaktoSpend/data/repositories/settings_repository_local.dart';
+import 'package:SaktoSpend/data/repositories/session_cart_repository_local.dart';
+import 'package:SaktoSpend/core/utils/utils.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
+import 'package:SaktoSpend/features/budgets/domain/repositories/budget_repository.dart';
+import 'package:SaktoSpend/features/budgets/domain/usecases/usecases.dart';
+import 'package:SaktoSpend/features/dashboard/domain/entities/dashboard_overview.dart';
+import 'package:SaktoSpend/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:SaktoSpend/features/dashboard/domain/usecases/usecases.dart';
+import 'package:SaktoSpend/features/history/domain/entities/history_overview.dart';
+import 'package:SaktoSpend/features/history/domain/repositories/history_repository.dart';
+import 'package:SaktoSpend/features/history/domain/usecases/usecases.dart';
+import 'package:SaktoSpend/features/settings/domain/entities/user_profile.dart';
+import 'package:SaktoSpend/features/settings/domain/repositories/settings_repository.dart';
+import 'package:SaktoSpend/features/settings/domain/usecases/usecases.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/repositories/session_cart_repository.dart';
+import 'package:SaktoSpend/features/shopping_session/domain/usecases/usecases.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -97,7 +97,9 @@ final getHistoryOverviewUseCaseProvider = Provider<GetHistoryOverviewUseCase>((
 
 final getDashboardOverviewUseCaseProvider =
     Provider<GetDashboardOverviewUseCase>((ref) {
-      return GetDashboardOverviewUseCase(ref.watch(dashboardRepositoryProvider));
+      return GetDashboardOverviewUseCase(
+        ref.watch(dashboardRepositoryProvider),
+      );
     });
 
 final getUserProfileUseCaseProvider = Provider<GetUserProfileUseCase>((ref) {
@@ -112,18 +114,23 @@ final getCurrencyCodeUseCaseProvider = Provider<GetCurrencyCodeUseCase>((ref) {
   return GetCurrencyCodeUseCase(ref.watch(settingsRepositoryProvider));
 });
 
-final saveCurrencyCodeUseCaseProvider = Provider<SaveCurrencyCodeUseCase>((ref) {
+final saveCurrencyCodeUseCaseProvider = Provider<SaveCurrencyCodeUseCase>((
+  ref,
+) {
   return SaveCurrencyCodeUseCase(ref.watch(settingsRepositoryProvider));
 });
 
-final getHardBudgetModeUseCaseProvider = Provider<GetHardBudgetModeUseCase>((ref) {
+final getHardBudgetModeUseCaseProvider = Provider<GetHardBudgetModeUseCase>((
+  ref,
+) {
   return GetHardBudgetModeUseCase(ref.watch(settingsRepositoryProvider));
 });
 
-final saveHardBudgetModeUseCaseProvider =
-    Provider<SaveHardBudgetModeUseCase>((ref) {
-      return SaveHardBudgetModeUseCase(ref.watch(settingsRepositoryProvider));
-    });
+final saveHardBudgetModeUseCaseProvider = Provider<SaveHardBudgetModeUseCase>((
+  ref,
+) {
+  return SaveHardBudgetModeUseCase(ref.watch(settingsRepositoryProvider));
+});
 
 final getSpendingThresholdAlertsEnabledUseCaseProvider =
     Provider<GetSpendingThresholdAlertsEnabledUseCase>((ref) {
@@ -141,7 +148,9 @@ final saveSpendingThresholdAlertsEnabledUseCaseProvider =
 
 final getPrimaryWarningLevelUseCaseProvider =
     Provider<GetPrimaryWarningLevelUseCase>((ref) {
-      return GetPrimaryWarningLevelUseCase(ref.watch(settingsRepositoryProvider));
+      return GetPrimaryWarningLevelUseCase(
+        ref.watch(settingsRepositoryProvider),
+      );
     });
 
 final savePrimaryWarningLevelUseCaseProvider =
@@ -158,7 +167,9 @@ final getOcrScannerEnabledUseCaseProvider =
 
 final saveOcrScannerEnabledUseCaseProvider =
     Provider<SaveOcrScannerEnabledUseCase>((ref) {
-      return SaveOcrScannerEnabledUseCase(ref.watch(settingsRepositoryProvider));
+      return SaveOcrScannerEnabledUseCase(
+        ref.watch(settingsRepositoryProvider),
+      );
     });
 
 final sessionCartTotalsProvider = FutureProvider<Map<String, int>>((ref) async {
@@ -169,7 +180,9 @@ final historyOverviewProvider = FutureProvider<HistoryOverview>((ref) async {
   return ref.watch(getHistoryOverviewUseCaseProvider).call();
 });
 
-final dashboardOverviewProvider = FutureProvider<DashboardOverview>((ref) async {
+final dashboardOverviewProvider = FutureProvider<DashboardOverview>((
+  ref,
+) async {
   return ref.watch(getDashboardOverviewUseCaseProvider).call();
 });
 
@@ -340,11 +353,11 @@ class AppHardBudgetModeNotifier extends AsyncNotifier<bool> {
 
 class AppSpendingThresholdAlertsNotifier extends AsyncNotifier<bool> {
   GetSpendingThresholdAlertsEnabledUseCase
-      get _getSpendingThresholdAlertsUseCase =>
-          ref.read(getSpendingThresholdAlertsEnabledUseCaseProvider);
+  get _getSpendingThresholdAlertsUseCase =>
+      ref.read(getSpendingThresholdAlertsEnabledUseCaseProvider);
   SaveSpendingThresholdAlertsEnabledUseCase
-      get _saveSpendingThresholdAlertsUseCase =>
-          ref.read(saveSpendingThresholdAlertsEnabledUseCaseProvider);
+  get _saveSpendingThresholdAlertsUseCase =>
+      ref.read(saveSpendingThresholdAlertsEnabledUseCaseProvider);
 
   @override
   Future<bool> build() async {

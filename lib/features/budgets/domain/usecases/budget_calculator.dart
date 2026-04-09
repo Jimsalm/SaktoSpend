@@ -1,5 +1,5 @@
-import 'package:budget_tracker/features/budgets/domain/entities/budget_health.dart';
-import 'package:budget_tracker/features/budgets/domain/entities/budget_projection.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget_health.dart';
+import 'package:SaktoSpend/features/budgets/domain/entities/budget_projection.dart';
 
 class BudgetCalculator {
   const BudgetCalculator._();
@@ -8,10 +8,7 @@ class BudgetCalculator {
     required double budgetAmount,
     required double runningTotal,
   }) {
-    _validateMoneyInput(
-      budgetAmount: budgetAmount,
-      runningTotal: runningTotal,
-    );
+    _validateMoneyInput(budgetAmount: budgetAmount, runningTotal: runningTotal);
     return budgetAmount - runningTotal;
   }
 

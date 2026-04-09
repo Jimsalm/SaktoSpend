@@ -1,4 +1,4 @@
-import 'package:budget_tracker/features/dashboard/domain/entities/dashboard_recent_session.dart';
+import 'package:SaktoSpend/features/dashboard/domain/entities/dashboard_recent_session.dart';
 
 class DashboardOverview {
   const DashboardOverview({

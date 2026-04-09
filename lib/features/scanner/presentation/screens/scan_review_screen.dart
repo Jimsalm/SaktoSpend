@@ -14,6 +14,7 @@ class ScanReviewScreen extends StatefulWidget {
     super.key,
     required this.onBack,
     required this.onAddToCart,
+    required this.hardBudgetModeEnabled,
     this.budget,
     this.existingCartItems = const <SessionCartItem>[],
     this.initialManualEntry = false,
@@ -21,6 +22,7 @@ class ScanReviewScreen extends StatefulWidget {
 
   final VoidCallback onBack;
   final ValueChanged<SessionCartItem> onAddToCart;
+  final bool hardBudgetModeEnabled;
   final Budget? budget;
   final List<SessionCartItem> existingCartItems;
   final bool initialManualEntry;
@@ -555,6 +557,21 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
   void _confirmEntry() {
     final rawName = _nameController.text.trim();
     final name = rawName.isNotEmpty ? rawName : 'Manual Item';
+    final totalBudget = widget.budget?.amount ?? 0;
+    final currentSessionTotal = widget.existingCartItems.fold<int>(
+      0,
+      (sum, item) => sum + item.totalPrice,
+    );
+    final newEntryTotal = _unitPrice * _quantity;
+    final projectedTotal = currentSessionTotal + newEntryTotal;
+
+    if (widget.hardBudgetModeEnabled && projectedTotal > totalBudget) {
+      AppSnackbars.showError(
+        context,
+        'Hard Budget Mode is enabled. This entry exceeds the remaining budget.',
+      );
+      return;
+    }
 
     final item = SessionCartItem(
       name: name,
@@ -795,8 +812,8 @@ class _EntryForm extends StatelessWidget {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      prefixText: '₱  ',
+                    decoration: InputDecoration(
+                      prefixText: '${MoneyUtils.currencySymbol}  ',
                       hintText: '0.00',
                     ),
                   ),

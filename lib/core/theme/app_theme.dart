@@ -91,6 +91,24 @@ class AppTheme {
         foregroundColor: Colors.white,
         backgroundColor: accent,
       ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF141414),
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          height: 1.25,
+        ),
+        actionTextColor: const Color(0xFFEDE7DA),
+        showCloseIcon: true,
+        closeIconColor: const Color(0xFFF1EFEA),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Color(0xFF2F2F2F)),
+        ),
+        elevation: 6,
+      ),
       chipTheme: ChipThemeData(
         backgroundColor: const Color(0xFFF1EFEA),
         selectedColor: const Color(0xFFE9E6DE),

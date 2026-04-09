@@ -230,6 +230,8 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
   }
 
   Future<void> _openBudgetDialog({Budget? initial}) async {
+    final defaultWarningPercent =
+        ref.read(appPrimaryWarningLevelProvider).valueOrNull ?? 80.0;
     final result = await showModalBottomSheet<_BudgetFormValue>(
       context: context,
       isScrollControlled: true,
@@ -237,7 +239,10 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
       ),
-      builder: (context) => _BudgetFormDialog(initial: initial),
+      builder: (context) => _BudgetFormDialog(
+        initial: initial,
+        defaultWarningPercent: defaultWarningPercent,
+      ),
     );
 
     if (result == null) {
@@ -352,9 +357,13 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
 }
 
 class _BudgetFormDialog extends StatefulWidget {
-  const _BudgetFormDialog({this.initial});
+  const _BudgetFormDialog({
+    this.initial,
+    required this.defaultWarningPercent,
+  });
 
   final Budget? initial;
+  final double defaultWarningPercent;
 
   @override
   State<_BudgetFormDialog> createState() => _BudgetFormDialogState();
@@ -378,7 +387,7 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
           ? MoneyUtils.centavosToInputValue(initial.amount)
           : '',
     );
-    _warningPercent = initial?.warningPercent ?? 80;
+    _warningPercent = initial?.warningPercent ?? widget.defaultWarningPercent;
     _selectedType = _normalizeSelectableType(initial?.type);
     _isActive = initial?.isActive ?? true;
   }
@@ -464,8 +473,8 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
                                         const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    decoration: const InputDecoration(
-                                      prefixText: '₱ ',
+                                    decoration: InputDecoration(
+                                      prefixText: '${MoneyUtils.currencySymbol} ',
                                       hintText: '0.00',
                                     ),
                                     validator: (value) {

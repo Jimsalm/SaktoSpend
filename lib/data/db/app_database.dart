@@ -6,6 +6,8 @@ class AppDatabase {
   static const _dbVersion = 1;
   static const budgetsTable = 'budgets';
   static const sessionCartItemsTable = 'session_cart_items';
+  static const userProfileTable = 'user_profile';
+  static const appSettingsTable = 'app_settings';
 
   Database? _database;
 
@@ -34,11 +36,32 @@ class AppDatabase {
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
-      onCreate: (db, version) async {
+      onOpen: (db) async {
+        await _createUserProfileTable(db);
         await _createBudgetsTable(db);
         await _createSessionCartItemsTable(db);
+        await _createAppSettingsTable(db);
+      },
+      onCreate: (db, version) async {
+        await _createUserProfileTable(db);
+        await _createBudgetsTable(db);
+        await _createSessionCartItemsTable(db);
+        await _createAppSettingsTable(db);
       },
     );
+  }
+
+  Future<void> _createUserProfileTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $userProfileTable(
+        id TEXT PRIMARY KEY CHECK(length(trim(id)) > 0),
+        name TEXT NOT NULL CHECK(length(trim(name)) > 0),
+        email TEXT NOT NULL CHECK(length(trim(email)) > 0),
+        image_url TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
+        updated_at TEXT NOT NULL CHECK(length(trim(updated_at)) > 0)
+      )
+    ''');
   }
 
   Future<void> _createBudgetsTable(Database db) async {
@@ -74,6 +97,15 @@ class AppDatabase {
     await db.execute('''
       CREATE INDEX IF NOT EXISTS idx_${sessionCartItemsTable}_budget_id
       ON $sessionCartItemsTable(budget_id)
+    ''');
+  }
+
+  Future<void> _createAppSettingsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $appSettingsTable(
+        key TEXT PRIMARY KEY CHECK(length(trim(key)) > 0),
+        value TEXT NOT NULL
+      )
     ''');
   }
 }

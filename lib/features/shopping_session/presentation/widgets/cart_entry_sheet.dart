@@ -8,6 +8,7 @@ Future<SessionCartItem?> showCartEntrySheet(
   required int budgetTotal,
   required int budgetRemainingBeforeEntry,
   required String submitLabel,
+  required bool hardBudgetModeEnabled,
 }) async {
   var name = initialItem.name;
   var priceText = MoneyUtils.centavosToInputValue(initialItem.unitPrice);
@@ -46,6 +47,7 @@ Future<SessionCartItem?> showCartEntrySheet(
           final progress = safeBudgetBase <= 0
               ? 0.0
               : (remaining / safeBudgetBase).clamp(0.0, 1.0);
+          final exceedsHardLimit = hardBudgetModeEnabled && remaining < 0;
           final viewInsets = MediaQuery.of(context).viewInsets.bottom;
 
           return SafeArea(
@@ -158,8 +160,8 @@ Future<SessionCartItem?> showCartEntrySheet(
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                              decoration: const InputDecoration(
-                                prefixText: '₱  ',
+                              decoration: InputDecoration(
+                                prefixText: '${MoneyUtils.currencySymbol}  ',
                                 hintText: '0.00',
                               ),
                             ),
@@ -326,6 +328,16 @@ Future<SessionCartItem?> showCartEntrySheet(
                       ],
                     ),
                   ),
+                  if (exceedsHardLimit) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Hard Budget Mode is enabled. Reduce total cost to continue.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFFB81A16),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 18),
                   _editorLabel(theme, 'TOTAL COST'),
                   const SizedBox(height: 4),
@@ -345,7 +357,9 @@ Future<SessionCartItem?> showCartEntrySheet(
                     width: double.infinity,
                     height: 52,
                     child: FilledButton(
-                      onPressed: () async {
+                      onPressed: exceedsHardLimit
+                          ? null
+                          : () async {
                         final rawName = name.trim();
                         final nameValue = rawName.isEmpty
                             ? 'Manual Item'

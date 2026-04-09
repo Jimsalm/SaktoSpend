@@ -17,6 +17,8 @@ class ActiveSessionScreen extends StatelessWidget {
     required this.onEditItem,
     required this.onDeleteItem,
     required this.cartItems,
+    required this.hardBudgetModeEnabled,
+    required this.ocrScannerEnabled,
     this.budget,
   });
 
@@ -26,6 +28,8 @@ class ActiveSessionScreen extends StatelessWidget {
   final void Function(int index, SessionCartItem item) onEditItem;
   final ValueChanged<int> onDeleteItem;
   final List<SessionCartItem> cartItems;
+  final bool hardBudgetModeEnabled;
+  final bool ocrScannerEnabled;
   final Budget? budget;
 
   @override
@@ -55,6 +59,36 @@ class ActiveSessionScreen extends StatelessWidget {
                   icon: const Icon(Icons.arrow_back),
                 ),
                 const Spacer(),
+                if (hardBudgetModeEnabled)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF111111),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.shield_rounded,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'HARD MODE ON',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                            letterSpacing: 0.8,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
             RemainingBudgetCard(
@@ -119,12 +153,16 @@ class ActiveSessionScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 50,
                     child: FilledButton.icon(
-                      onPressed: onOpenScanner,
+                      onPressed: ocrScannerEnabled ? onOpenScanner : null,
                       icon: const Icon(Icons.qr_code_scanner, size: 18),
-                      label: const Text('Scan Barcode'),
+                      label: Text(
+                        ocrScannerEnabled ? 'Scan Barcode' : 'OCR Disabled',
+                      ),
                       style: FilledButton.styleFrom(
                         backgroundColor: Colors.black,
                         foregroundColor: Colors.white,
+                        disabledBackgroundColor: const Color(0xFFE4E1DC),
+                        disabledForegroundColor: const Color(0xFF8F8A81),
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(7),
@@ -216,6 +254,7 @@ class ActiveSessionScreen extends StatelessWidget {
       budgetTotal: budgetTotal,
       budgetRemainingBeforeEntry: budgetTotal - currentSessionTotal,
       submitLabel: 'Confirm Entry',
+      hardBudgetModeEnabled: hardBudgetModeEnabled,
     );
 
     await _dispatchAddedItem(created);
@@ -239,6 +278,7 @@ class ActiveSessionScreen extends StatelessWidget {
       budgetTotal: budgetTotal,
       budgetRemainingBeforeEntry: budgetTotal - currentSessionTotal,
       submitLabel: 'Confirm Entry',
+      hardBudgetModeEnabled: hardBudgetModeEnabled,
     );
 
     await _dispatchAddedItem(created);
@@ -258,6 +298,7 @@ class ActiveSessionScreen extends StatelessWidget {
       budgetRemainingBeforeEntry:
           budgetTotal - (currentSessionTotal - item.totalPrice),
       submitLabel: 'Save Changes',
+      hardBudgetModeEnabled: hardBudgetModeEnabled,
     );
     if (updated == null) {
       return;

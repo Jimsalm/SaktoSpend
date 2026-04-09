@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Budget Tracker needs camera access to scan product barcodes.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Budget Tracker needs microphone access for voice item entry.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

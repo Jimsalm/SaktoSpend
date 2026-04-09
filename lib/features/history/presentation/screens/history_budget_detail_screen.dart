@@ -262,21 +262,16 @@ class _HistoryBudgetDetailScreenState
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Created "${widget.historyItem.name}" for $createdForLabel',
-          ),
-        ),
+      AppSnackbars.showSuccess(
+        context,
+        'Created "${widget.historyItem.name}" for $createdForLabel',
       );
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to repeat budget: $error')),
-      );
+      AppSnackbars.showError(context, 'Failed to repeat budget: $error');
     } finally {
       if (mounted) {
         setState(() => _isRepeating = false);

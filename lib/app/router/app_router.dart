@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:budget_tracker/app/providers/providers.dart';
+import 'package:budget_tracker/core/utils/utils.dart';
 import 'package:budget_tracker/features/budgets/presentation/screens/budgets_tab_screen.dart';
 import 'package:budget_tracker/features/budgets/domain/entities/budget.dart';
-import 'package:budget_tracker/features/dashboard/presentation/screens/home_overview_screen.dart';
+import 'package:budget_tracker/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:budget_tracker/features/history/presentation/screens/history_screen.dart';
 import 'package:budget_tracker/features/scanner/presentation/screens/scan_review_screen.dart';
+import 'package:budget_tracker/features/settings/presentation/screens/settings_screen.dart';
 import 'package:budget_tracker/features/shopping_session/domain/entities/session_cart_item.dart';
 import 'package:budget_tracker/features/shopping_session/presentation/screens/active_session_screen.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,8 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
   Budget? _selectedBudget;
   bool _scannerManualMode = false;
   final List<SessionCartItem> _sessionCartItems = [];
+  String? _pendingThresholdAlertMessage;
+  bool _isThresholdAlertFlushScheduled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +54,11 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
 
   Widget _buildBody() {
     if (_tabIndex == 0) {
-      return const HomeOverviewScreen();
+      return DashboardScreen(
+        onOpenRecentBudget: (budgetId) {
+          unawaited(_openBudgetFromDashboard(budgetId));
+        },
+      );
     }
 
     if (_tabIndex == 1) {
@@ -65,8 +73,11 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
             },
           );
         case _BudgetsFlow.activeSession:
+          _scheduleThresholdAlertFlush();
           return ActiveSessionScreen(
             budget: _selectedBudget,
+            hardBudgetModeEnabled: _isHardBudgetModeEnabled,
+            ocrScannerEnabled: _isOcrScannerEnabled,
             cartItems: _sessionCartItems,
             onAddManualItem: (item) {
               unawaited(_addItemToSession(item));
@@ -84,6 +95,13 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
               });
             },
             onOpenScanner: () {
+              if (!_isOcrScannerEnabled) {
+                AppSnackbars.showError(
+                  context,
+                  'OCR Scanner is disabled in Settings.',
+                );
+                return;
+              }
               setState(() {
                 _scannerManualMode = false;
                 _budgetsFlow = _BudgetsFlow.scanReview;
@@ -95,6 +113,7 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
             budget: _selectedBudget,
             existingCartItems: _sessionCartItems,
             initialManualEntry: _scannerManualMode,
+            hardBudgetModeEnabled: _isHardBudgetModeEnabled,
             onBack: () {
               setState(() {
                 _scannerManualMode = false;
@@ -113,10 +132,7 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
     }
 
     if (_tabIndex == 3) {
-      return const _SimpleTab(
-        title: 'Settings',
-        subtitle: 'Settings controls will appear here.',
-      );
+      return const SettingsScreen();
     }
 
     return const _SimpleTab(
@@ -126,10 +142,6 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
   }
 
   Widget? _buildFab() {
-    if (_tabIndex == 0) {
-      return _DarkFab(onTap: () {}, size: 56);
-    }
-
     if (_tabIndex == 1 && _budgetsFlow == _BudgetsFlow.overview) {
       return _DarkFab(
         onTap: () {
@@ -156,6 +168,15 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
       (_tabIndex == 1 && _budgetsFlow == _BudgetsFlow.scanReview) ||
       (_tabIndex == 1 && _budgetsFlow == _BudgetsFlow.activeSession) ||
       _tabIndex != 0;
+
+  bool get _isHardBudgetModeEnabled =>
+      ref.read(appHardBudgetModeProvider).valueOrNull ?? true;
+  bool get _isSpendingThresholdAlertsEnabled =>
+      ref.read(appSpendingThresholdAlertsProvider).valueOrNull ?? true;
+  double get _primaryWarningLevel =>
+      ref.read(appPrimaryWarningLevelProvider).valueOrNull ?? 80.0;
+  bool get _isOcrScannerEnabled =>
+      ref.read(appOcrScannerEnabledProvider).valueOrNull ?? true;
 
   bool _handleInAppBack() {
     if (_tabIndex == 1 && _budgetsFlow == _BudgetsFlow.scanReview) {
@@ -208,17 +229,59 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
     });
   }
 
+  Future<void> _openBudgetFromDashboard(String budgetId) async {
+    final budgets = await ref.read(getBudgetsUseCaseProvider).call();
+    Budget? targetBudget;
+    for (final budget in budgets) {
+      if (budget.id == budgetId) {
+        targetBudget = budget;
+        break;
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _tabIndex = 1;
+    });
+
+    if (targetBudget == null) {
+      return;
+    }
+
+    await _openActiveSession(targetBudget);
+  }
+
   Future<void> _addItemToSession(SessionCartItem item) async {
     final budgetId = _selectedBudget?.id;
     if (budgetId == null) {
       return;
     }
 
+    final budgetAmount = _selectedBudget?.amount ?? 0;
+    final currentTotal = _sessionCartItems.fold<int>(
+      0,
+      (sum, existing) => sum + existing.totalPrice,
+    );
+    final projectedTotal = currentTotal + item.totalPrice;
+    if (_isHardBudgetModeEnabled && projectedTotal > budgetAmount) {
+      _showHardBudgetBlockedMessage();
+      return;
+    }
+    final thresholdAlertMessage = _buildSpendingThresholdAlertMessage(
+      previousSpent: currentTotal,
+      nextSpent: projectedTotal,
+      budgetAmount: budgetAmount,
+    );
+
     setState(() {
       _sessionCartItems.add(item);
       _scannerManualMode = false;
       _budgetsFlow = _BudgetsFlow.activeSession;
     });
+    _showSpendingThresholdAlert(thresholdAlertMessage);
 
     await ref
         .read(addSessionCartItemUseCaseProvider)
@@ -232,9 +295,28 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
       return;
     }
 
+    final existingItem = _sessionCartItems[index];
+    final budgetAmount = _selectedBudget?.amount ?? 0;
+    final currentTotal = _sessionCartItems.fold<int>(
+      0,
+      (sum, existing) => sum + existing.totalPrice,
+    );
+    final projectedTotal =
+        currentTotal - existingItem.totalPrice + updatedItem.totalPrice;
+    if (_isHardBudgetModeEnabled && projectedTotal > budgetAmount) {
+      _showHardBudgetBlockedMessage();
+      return;
+    }
+    final thresholdAlertMessage = _buildSpendingThresholdAlertMessage(
+      previousSpent: currentTotal,
+      nextSpent: projectedTotal,
+      budgetAmount: budgetAmount,
+    );
+
     setState(() {
       _sessionCartItems[index] = updatedItem;
     });
+    _showSpendingThresholdAlert(thresholdAlertMessage);
 
     await ref
         .read(replaceSessionCartItemsUseCaseProvider)
@@ -256,6 +338,85 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
         .read(replaceSessionCartItemsUseCaseProvider)
         .call(budgetId: budgetId, items: _sessionCartItems);
     ref.invalidate(sessionCartTotalsProvider);
+  }
+
+  void _showHardBudgetBlockedMessage() {
+    if (!mounted) {
+      return;
+    }
+    AppSnackbars.showError(
+      context,
+      'Hard Budget Mode is enabled. This entry exceeds the remaining budget.',
+    );
+  }
+
+  String? _buildSpendingThresholdAlertMessage({
+    required int previousSpent,
+    required int nextSpent,
+    required int budgetAmount,
+  }) {
+    if (!_isSpendingThresholdAlertsEnabled || budgetAmount <= 0) {
+      return null;
+    }
+
+    final budgetWarning = _selectedBudget?.warningPercent ?? _primaryWarningLevel;
+    final warningPercent = (budgetWarning <= 0 ? _primaryWarningLevel : budgetWarning)
+        .clamp(0.0, 100.0)
+        .toDouble();
+    final threshold = warningPercent / 100;
+    final previousUtilization = (previousSpent / budgetAmount).clamp(0.0, 1.0);
+    final nextUtilization = (nextSpent / budgetAmount).clamp(0.0, 1.0);
+
+    if (previousUtilization < threshold && nextUtilization >= threshold) {
+      final budgetName = _selectedBudget?.name.trim();
+      final label = (budgetName == null || budgetName.isEmpty)
+          ? 'Budget'
+          : budgetName;
+      return '$label reached ${warningPercent.toStringAsFixed(0)}% of total budget.';
+    }
+    return null;
+  }
+
+  void _showSpendingThresholdAlert(String? message) {
+    if (message == null || !mounted) {
+      return;
+    }
+    _pendingThresholdAlertMessage = message;
+    _scheduleThresholdAlertFlush();
+  }
+
+  void _scheduleThresholdAlertFlush() {
+    if (_isThresholdAlertFlushScheduled || !mounted) {
+      return;
+    }
+    _isThresholdAlertFlushScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _isThresholdAlertFlushScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 220));
+      if (!mounted) {
+        return;
+      }
+      _flushPendingThresholdAlert();
+    });
+  }
+
+  void _flushPendingThresholdAlert() {
+    final message = _pendingThresholdAlertMessage;
+    if (message == null) {
+      return;
+    }
+    if (_tabIndex != 1 || _budgetsFlow != _BudgetsFlow.activeSession) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) {
+      return;
+    }
+    _pendingThresholdAlertMessage = null;
+    AppSnackbars.showSuccess(context, message);
   }
 }
 

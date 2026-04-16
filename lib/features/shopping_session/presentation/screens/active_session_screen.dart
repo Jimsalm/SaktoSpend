@@ -8,6 +8,8 @@ import 'package:SaktoSpend/features/shopping_session/presentation/widgets/sessio
 import 'package:SaktoSpend/features/shopping_session/presentation/widgets/voice_entry_sheet.dart';
 import 'package:flutter/material.dart';
 
+part 'active_session_screen_logic.dart';
+
 class ActiveSessionScreen extends StatelessWidget {
   const ActiveSessionScreen({
     super.key,
@@ -141,6 +143,8 @@ class ActiveSessionScreen extends StatelessWidget {
                           item: item,
                           budgetTotal: totalBudget,
                           currentSessionTotal: sessionCartTotal,
+                          hardBudgetModeEnabled: hardBudgetModeEnabled,
+                          onEditItem: onEditItem,
                         );
                       },
                     )
@@ -188,6 +192,8 @@ class ActiveSessionScreen extends StatelessWidget {
                           context,
                           budgetTotal: totalBudget,
                           currentSessionTotal: sessionCartTotal,
+                          hardBudgetModeEnabled: hardBudgetModeEnabled,
+                          onAddManualItem: onAddManualItem,
                         );
                       },
                       borderRadius: BorderRadius.circular(7),
@@ -214,6 +220,8 @@ class ActiveSessionScreen extends StatelessWidget {
                           context,
                           budgetTotal: totalBudget,
                           currentSessionTotal: sessionCartTotal,
+                          hardBudgetModeEnabled: hardBudgetModeEnabled,
+                          onAddManualItem: onAddManualItem,
                         );
                       },
                       borderRadius: BorderRadius.circular(7),
@@ -230,95 +238,4 @@ class ActiveSessionScreen extends StatelessWidget {
       ),
     );
   }
-
-  Future<void> _openVoiceEntrySheet(
-    BuildContext context, {
-    required int budgetTotal,
-    required int currentSessionTotal,
-  }) async {
-    final voiceDraft = await showVoiceCaptureSheet(context);
-    if (voiceDraft == null || !context.mounted) {
-      return;
-    }
-
-    final created = await showCartEntrySheet(
-      context,
-      initialItem: SessionCartItem(
-        name: voiceDraft.name,
-        category: 'Groceries',
-        unitPrice: voiceDraft.unitPrice,
-        quantity: 1,
-        unit: 'PC',
-        isEssential: false,
-      ),
-      budgetTotal: budgetTotal,
-      budgetRemainingBeforeEntry: budgetTotal - currentSessionTotal,
-      submitLabel: 'Confirm Entry',
-      hardBudgetModeEnabled: hardBudgetModeEnabled,
-    );
-
-    await _dispatchAddedItem(created);
-  }
-
-  Future<void> _openManualEntrySheet(
-    BuildContext context, {
-    required int budgetTotal,
-    required int currentSessionTotal,
-  }) async {
-    final created = await showCartEntrySheet(
-      context,
-      initialItem: const SessionCartItem(
-        name: '',
-        category: 'Groceries',
-        unitPrice: 0,
-        quantity: 1,
-        unit: 'PC',
-        isEssential: false,
-      ),
-      budgetTotal: budgetTotal,
-      budgetRemainingBeforeEntry: budgetTotal - currentSessionTotal,
-      submitLabel: 'Confirm Entry',
-      hardBudgetModeEnabled: hardBudgetModeEnabled,
-    );
-
-    await _dispatchAddedItem(created);
-  }
-
-  Future<void> _openEditEntrySheet(
-    BuildContext context, {
-    required int index,
-    required SessionCartItem item,
-    required int budgetTotal,
-    required int currentSessionTotal,
-  }) async {
-    final updated = await showCartEntrySheet(
-      context,
-      initialItem: item,
-      budgetTotal: budgetTotal,
-      budgetRemainingBeforeEntry:
-          budgetTotal - (currentSessionTotal - item.totalPrice),
-      submitLabel: 'Save Changes',
-      hardBudgetModeEnabled: hardBudgetModeEnabled,
-    );
-    if (updated == null) {
-      return;
-    }
-
-    await Future<void>.delayed(const Duration(milliseconds: 240));
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      onEditItem(index, updated);
-    });
-  }
-
-  Future<void> _dispatchAddedItem(SessionCartItem? item) async {
-    if (item == null) {
-      return;
-    }
-    await Future<void>.delayed(const Duration(milliseconds: 240));
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      onAddManualItem(item);
-    });
-  }
 }
-
-String _money(int value) => MoneyUtils.centavosToCurrency(value);

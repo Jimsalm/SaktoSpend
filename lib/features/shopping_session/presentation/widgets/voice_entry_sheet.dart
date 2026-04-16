@@ -2,6 +2,9 @@ import 'package:SaktoSpend/core/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
+const _voiceAmountPattern =
+    r'\d{1,3}(?:[,\s]\d{3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?';
+
 class VoiceEntryDraft {
   const VoiceEntryDraft({required this.name, required this.unitPrice});
 
@@ -16,6 +19,7 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
   var isListening = false;
   var isPressing = false;
   var transcript = '';
+  var finalTranscript = '';
   var errorText = '';
 
   Future<void> ensureInitialized(StateSetter setModalState) async {
@@ -74,6 +78,9 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
         }
         setModalState(() {
           transcript = result.recognizedWords.trim();
+          if (result.finalResult) {
+            finalTranscript = transcript;
+          }
           errorText = '';
         });
       },
@@ -89,7 +96,7 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
   }
 
   Future<void> stopListening(StateSetter setModalState) async {
-    if (!isListening) {
+    if (!isInitialized) {
       return;
     }
     await speech.stop();
@@ -172,7 +179,12 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
                   Center(
                     child: GestureDetector(
                       onTapDown: (_) {
-                        isPressing = true;
+                        setModalState(() {
+                          isPressing = true;
+                          transcript = '';
+                          finalTranscript = '';
+                          errorText = '';
+                        });
                         startListening(setModalState);
                       },
                       onTapCancel: () async {
@@ -182,7 +194,23 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
                       onTapUp: (_) async {
                         isPressing = false;
                         await stopListening(setModalState);
-                        final draft = _parseVoiceDraft(transcript);
+                        await Future<void>.delayed(
+                          const Duration(milliseconds: 220),
+                        );
+
+                        final candidates = <String>[
+                          finalTranscript.trim(),
+                          transcript.trim(),
+                        ].where((entry) => entry.isNotEmpty).toSet().toList();
+
+                        VoiceEntryDraft? draft;
+                        for (final candidate in candidates) {
+                          draft = _parseVoiceDraft(candidate);
+                          if (draft != null) {
+                            break;
+                          }
+                        }
+
                         if (draft == null) {
                           setModalState(() {
                             errorText =
@@ -266,22 +294,23 @@ VoiceEntryDraft? _parseVoiceDraft(String transcript) {
 int? _extractVoicePrice(String transcript) {
   final normalized = transcript
       .toLowerCase()
-      .replaceAll(',', '')
       .replaceAll(RegExp(r'\b(pesos|peso|php)\b'), '')
+      .replaceAll('₱', '')
       .replaceAllMapped(
         RegExp(r'(\d+)\s+point\s+(\d{1,2})'),
         (match) => '${match.group(1)}.${match.group(2)}',
       );
-  final matches = RegExp(r'\d+(?:\.\d{1,2})?').allMatches(normalized).toList();
+  final matches = RegExp(_voiceAmountPattern).allMatches(normalized).toList();
   if (matches.isEmpty) {
     return null;
   }
-  return MoneyUtils.parseCurrencyToCentavos(matches.last.group(0)!);
+  final amountText = matches.last.group(0)!.replaceAll(RegExp(r'[,\s]'), '');
+  return MoneyUtils.parseCurrencyToCentavos(amountText);
 }
 
 String _extractVoiceName(String transcript) {
   var working = transcript;
-  final matches = RegExp(r'\d+(?:\.\d{1,2})?').allMatches(working).toList();
+  final matches = RegExp(_voiceAmountPattern).allMatches(working).toList();
   if (matches.isNotEmpty) {
     final last = matches.last;
     working =
@@ -298,5 +327,6 @@ String _extractVoiceName(String transcript) {
       )
       .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
+  working = working.replaceAll(RegExp(r'^[,.\-\s]+|[,.\-\s]+$'), '');
   return working;
 }

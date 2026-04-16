@@ -32,8 +32,11 @@ class ScanReviewScreen extends StatefulWidget {
 }
 
 class _ScanReviewScreenState extends State<ScanReviewScreen> {
+  static const Duration _captureCooldown = Duration(milliseconds: 550);
+  static const int _requiredStableDetections = 2;
+
   final MobileScannerController _cameraController = MobileScannerController(
-    detectionSpeed: DetectionSpeed.noDuplicates,
+    detectionSpeed: DetectionSpeed.normal,
     facing: CameraFacing.back,
     returnImage: true,
   );
@@ -61,6 +64,9 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
   bool _isProcessingCapture = false;
   bool _isCameraStopped = false;
   bool _manualOnlyMode = false;
+  DateTime? _lastCaptureAt;
+  String? _lastExtractKey;
+  int _stableExtractHits = 0;
 
   @override
   void initState() {
@@ -309,6 +315,9 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
 
   String _captureLabel(bool hasScan) {
     if (_isProcessingCapture) return 'Reading product details...';
+    if (!hasScan && _stableExtractHits > 0) {
+      return 'Hold steady ($_stableExtractHits/$_requiredStableDetections)';
+    }
     if (hasScan) return 'Product detected';
     return 'Align product label inside frame';
   }
@@ -328,6 +337,12 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
     if (_showEntry || _isProcessingCapture || _isCameraStopped) {
       return;
     }
+    final now = DateTime.now();
+    final last = _lastCaptureAt;
+    if (last != null && now.difference(last) < _captureCooldown) {
+      return;
+    }
+    _lastCaptureAt = now;
     unawaited(_handleCapture(capture));
   }
 
@@ -343,6 +358,20 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       if (!mounted) return;
 
       if (extracted == null) {
+        _stableExtractHits = 0;
+        _lastExtractKey = null;
+        setState(() => _isProcessingCapture = false);
+        return;
+      }
+
+      final extractKey = _buildExtractKey(extracted);
+      if (extractKey == _lastExtractKey) {
+        _stableExtractHits += 1;
+      } else {
+        _lastExtractKey = extractKey;
+        _stableExtractHits = 1;
+      }
+      if (_stableExtractHits < _requiredStableDetections) {
         setState(() => _isProcessingCapture = false);
         return;
       }
@@ -405,13 +434,16 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       final price = _extractPrice(lines.join(' '));
       final name = _extractName(lines);
 
-      if (name == null && price == null) {
+      if (name == null || price == null) {
+        return null;
+      }
+      if (!_isReliableExtractedName(name) || !_isReliableExtractedPrice(price)) {
         return null;
       }
 
       return _ExtractedProduct(
-        name: name ?? 'Unknown Product',
-        price: price ?? 0,
+        name: name,
+        price: price,
       );
     } finally {
       if (await tempFile.exists()) {
@@ -502,6 +534,40 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
     return MoneyUtils.parseCurrencyToCentavos(raw);
   }
 
+  bool _isReliableExtractedName(String name) {
+    final trimmed = name.trim();
+    if (trimmed.length < 3 || trimmed.length > 60) {
+      return false;
+    }
+    if (RegExp(
+      r'po\s*no|serial|barcode|lot|invoice|receipt',
+      caseSensitive: false,
+    ).hasMatch(trimmed)) {
+      return false;
+    }
+    if (RegExp(r'^\d+$').hasMatch(trimmed)) {
+      return false;
+    }
+    return RegExp(r'[A-Za-z]').hasMatch(trimmed);
+  }
+
+  bool _isReliableExtractedPrice(int price) {
+    if (price <= 0) {
+      return false;
+    }
+    // Ignore obviously noisy OCR values (e.g., accidental huge readings).
+    return price <= 50000000; // up to 500,000.00
+  }
+
+  String _buildExtractKey(_ExtractedProduct extracted) {
+    final normalizedName = extracted.name
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return '$normalizedName|${extracted.price}';
+  }
+
   String _extractBarcodeCode(BarcodeCapture capture) {
     return capture.barcodes
         .map((barcode) => barcode.rawValue ?? barcode.displayValue)
@@ -511,6 +577,7 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
   }
 
   void _openManualEntry() {
+    _resetScannerStability();
     setState(() {
       _scannedProduct = null;
       _nameController.clear();
@@ -540,6 +607,7 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
   }
 
   void _restartScanner() {
+    _resetScannerStability();
     setState(() {
       _isProcessingCapture = false;
       _isCameraStopped = false;
@@ -552,6 +620,12 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       _isEssential = false;
     });
     unawaited(_cameraController.start());
+  }
+
+  void _resetScannerStability() {
+    _lastCaptureAt = null;
+    _lastExtractKey = null;
+    _stableExtractHits = 0;
   }
 
   void _confirmEntry() {

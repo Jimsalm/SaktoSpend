@@ -11,7 +11,9 @@ Future<SessionCartItem?> showCartEntrySheet(
   required bool hardBudgetModeEnabled,
 }) async {
   var name = initialItem.name;
-  var priceText = MoneyUtils.centavosToInputValue(initialItem.unitPrice);
+  var priceText = initialItem.unitPrice > 0
+      ? MoneyUtils.centavosToInputValue(initialItem.unitPrice)
+      : '';
   var category = initialItem.category;
   var quantity = initialItem.quantity;
   var unit = initialItem.unit;

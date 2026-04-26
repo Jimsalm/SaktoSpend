@@ -9,12 +9,18 @@ class SessionCartList extends StatelessWidget {
     required this.moneyFormatter,
     required this.onEditRequested,
     required this.onDeleteItem,
+    this.padding = EdgeInsets.zero,
+    this.physics,
+    this.shrinkWrap = false,
   });
 
   final List<SessionCartItem> items;
   final String Function(int value) moneyFormatter;
   final Future<void> Function(int index, SessionCartItem item) onEditRequested;
   final ValueChanged<int> onDeleteItem;
+  final EdgeInsetsGeometry padding;
+  final ScrollPhysics? physics;
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +34,9 @@ class SessionCartList extends StatelessWidget {
         return a.value.isEssential ? -1 : 1;
       });
     return ListView.separated(
-      padding: EdgeInsets.zero,
+      padding: padding,
+      physics: physics,
+      shrinkWrap: shrinkWrap,
       itemCount: displayItems.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {

@@ -69,97 +69,109 @@ class ActiveSessionScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-            Text(
-              budget?.name ?? 'Shopping Session',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontSize: 40,
-                color: tokens.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Track items as you shop with label scan, voice, or quick manual entry.',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: tokens.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 20),
-            RemainingBudgetCard(
-              remainingText: _money(remainingBudget),
-              spentText: _money(spent),
-              totalText: _money(totalBudget),
-              progress: progress,
-              isNegativeRemaining: remainingBudget < 0,
-            ),
-            const SizedBox(height: 26),
-            Row(
-              children: [
-                Text(
-                  'Active Cart',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: tokens.textPrimary,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: tokens.surfacePrimary,
-                    border: Border.all(color: tokens.borderSubtle),
-                    borderRadius: BorderRadius.circular(999),
-                    boxShadow: [
-                      BoxShadow(
-                        color: tokens.shadowColor,
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    '${cartItems.length} ITEMS',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: tokens.textSecondary,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              showItems
-                  ? 'Your current cart, with essentials grouped first for faster review.'
-                  : 'Your cart is ready for items whenever you are.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: tokens.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 14),
             Expanded(
-              child: showItems
-                  ? SessionCartList(
-                      items: cartItems,
-                      moneyFormatter: _money,
-                      onDeleteItem: onDeleteItem,
-                      onEditRequested: (index, item) async {
-                        await _openEditEntrySheet(
-                          context,
-                          index: index,
-                          item: item,
-                          budgetTotal: totalBudget,
-                          currentSessionTotal: sessionCartTotal,
-                          hardBudgetModeEnabled: hardBudgetModeEnabled,
-                          onEditItem: onEditItem,
-                        );
-                      },
-                    )
-                  : const EmptyCartPlaceholder(),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      budget?.name ?? 'Shopping Session',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontSize: 40,
+                        color: tokens.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Track items as you shop with label scan, voice, or quick manual entry.',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: tokens.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    RemainingBudgetCard(
+                      remainingText: _money(remainingBudget),
+                      spentText: _money(spent),
+                      totalText: _money(totalBudget),
+                      progress: progress,
+                      isNegativeRemaining: remainingBudget < 0,
+                    ),
+                    const SizedBox(height: 26),
+                    Row(
+                      children: [
+                        Text(
+                          'Active Cart',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: tokens.textPrimary,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: tokens.surfacePrimary,
+                            border: Border.all(color: tokens.borderSubtle),
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: [
+                              BoxShadow(
+                                color: tokens.shadowColor,
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            '${cartItems.length} ITEMS',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: tokens.textSecondary,
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      showItems
+                          ? 'Your current cart, with essentials grouped first for faster review.'
+                          : 'Your cart is ready for items whenever you are.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: tokens.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    if (showItems)
+                      SessionCartList(
+                        items: cartItems,
+                        moneyFormatter: _money,
+                        padding: const EdgeInsets.only(bottom: 8),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        onDeleteItem: onDeleteItem,
+                        onEditRequested: (index, item) async {
+                          await _openEditEntrySheet(
+                            context,
+                            index: index,
+                            item: item,
+                            budgetTotal: totalBudget,
+                            currentSessionTotal: sessionCartTotal,
+                            hardBudgetModeEnabled: hardBudgetModeEnabled,
+                            onEditItem: onEditItem,
+                          );
+                        },
+                      )
+                    else
+                      const EmptyCartPlaceholder(),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 18),
             Row(

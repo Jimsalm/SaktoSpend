@@ -28,7 +28,7 @@ class EmptyCartPlaceholder extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Scan a barcode or add an item\nmanually to get started.',
+            'Scan a product label or add an item\nmanually to get started.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: const Color(0xFF66635C),

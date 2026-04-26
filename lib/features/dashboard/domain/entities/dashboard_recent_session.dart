@@ -4,6 +4,7 @@ class DashboardRecentSession {
     required this.name,
     required this.type,
     required this.amountCentavos,
+    required this.budgetAmountCentavos,
     required this.occurredAt,
     required this.isActive,
   });
@@ -12,6 +13,7 @@ class DashboardRecentSession {
   final String name;
   final String type;
   final int amountCentavos;
+  final int budgetAmountCentavos;
   final DateTime occurredAt;
   final bool isActive;
 }

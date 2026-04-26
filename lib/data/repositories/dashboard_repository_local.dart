@@ -1,4 +1,5 @@
 import 'package:SaktoSpend/data/db/app_database.dart';
+import 'package:SaktoSpend/features/dashboard/domain/entities/dashboard_avoidable_category.dart';
 import 'package:SaktoSpend/features/dashboard/domain/entities/dashboard_overview.dart';
 import 'package:SaktoSpend/features/dashboard/domain/entities/dashboard_recent_session.dart';
 import 'package:SaktoSpend/features/dashboard/domain/repositories/dashboard_repository.dart';
@@ -65,12 +66,31 @@ class DashboardRepositoryLocal implements DashboardRepository {
       [startIso, endIso],
     );
 
+    final avoidableCategoryRows = await db.rawQuery(
+      '''
+      SELECT
+        s.category,
+        COALESCE(SUM(s.unit_price * s.quantity), 0) AS total
+      FROM ${AppDatabase.sessionCartItemsTable} s
+      INNER JOIN ${AppDatabase.budgetsTable} b ON b.id = s.budget_id
+      WHERE s.created_at >= ? AND s.created_at < ?
+        AND s.is_essential = 0
+        AND b.is_active = 1
+        AND b.created_at >= ? AND b.created_at < ?
+      GROUP BY s.category
+      ORDER BY total DESC, s.category COLLATE NOCASE ASC
+      LIMIT 2
+      ''',
+      [startIso, endIso, startIso, endIso],
+    );
+
     final recentRows = await db.rawQuery(
       '''
       SELECT
         b.id AS budget_id,
         b.name,
         b.type,
+        b.amount,
         b.is_active,
         b.updated_at,
         COALESCE(SUM(s.unit_price * s.quantity), 0) AS spent_total
@@ -78,7 +98,7 @@ class DashboardRepositoryLocal implements DashboardRepository {
       LEFT JOIN ${AppDatabase.sessionCartItemsTable} s
         ON s.budget_id = b.id
       WHERE b.created_at >= ? AND b.created_at < ? AND b.is_active = 1
-      GROUP BY b.id, b.name, b.type, b.is_active, b.updated_at
+      GROUP BY b.id, b.name, b.type, b.amount, b.is_active, b.updated_at
       ORDER BY datetime(b.updated_at) DESC, b.id DESC
       LIMIT 6
       ''',
@@ -98,16 +118,29 @@ class DashboardRepositoryLocal implements DashboardRepository {
             ? 'shopping'
             : (row['type'] as String).trim(),
         amountCentavos: _asInt(row['spent_total']),
+        budgetAmountCentavos: _asInt(row['amount']),
         occurredAt: parsedDate.toLocal(),
         isActive: _asInt(row['is_active']) == 1,
       );
     }).toList();
+
+    final avoidableCategories = avoidableCategoryRows
+        .map(
+          (row) => DashboardAvoidableCategory(
+            category: ((row['category'] as String?) ?? '').trim().isEmpty
+                ? 'Other'
+                : (row['category'] as String).trim(),
+            amountCentavos: _asInt(row['total']),
+          ),
+        )
+        .toList();
 
     return DashboardOverview(
       totalSpentThisMonth: _firstTotal(totalSpentRow),
       avoidableSpendThisMonth: _firstTotal(avoidableSpentRow),
       essentialSpendThisMonth: _firstTotal(essentialSpentRow),
       currentMonthBudgetTotal: _firstTotal(budgetTotalRow),
+      avoidableCategories: avoidableCategories,
       recentSessions: recentSessions,
     );
   }

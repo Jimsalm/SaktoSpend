@@ -1,3 +1,4 @@
+import 'package:SaktoSpend/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class HistorySearchEmptyCard extends StatelessWidget {
@@ -6,33 +7,53 @@ class HistorySearchEmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
-        child: Column(
-          children: [
-            const Icon(
+    final tokens = context.appThemeTokens;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+      decoration: BoxDecoration(
+        color: tokens.surfacePrimary,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: tokens.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: tokens.shadowColor,
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 62,
+            height: 62,
+            decoration: BoxDecoration(
+              color: tokens.surfaceSecondary,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(
               Icons.search_off_rounded,
-              size: 40,
-              color: Color(0xFF8D8880),
+              size: 30,
+              color: tokens.textSecondary,
             ),
-            const SizedBox(height: 10),
-            Text(
-              'No matching budgets',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No matching budgets',
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: tokens.textPrimary,
             ),
-            const SizedBox(height: 6),
-            Text(
-              'Try another keyword.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: const Color(0xFF6A665F),
-              ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Try a different name, month, or budget type.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: tokens.textSecondary,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

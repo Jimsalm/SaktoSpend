@@ -10,6 +10,14 @@ class _HistoryViewData {
 
   final List<_HistoryMonthSectionData> sections;
 
+  int get totalCentavos =>
+      sections.fold(0, (sum, section) => sum + section.totalCentavos);
+
+  int get itemCount =>
+      sections.fold(0, (sum, section) => sum + section.items.length);
+
+  int get monthCount => sections.length;
+
   _HistoryViewData filterByQuery(String query) {
     final normalizedQuery = query.trim().toLowerCase();
     if (normalizedQuery.isEmpty) {
@@ -20,7 +28,7 @@ class _HistoryViewData {
         .map((section) {
           final filteredItems = section.items.where((item) {
             final searchable =
-                '${section.monthLabel} ${item.title} ${item.meta}'
+                '${section.monthLabel} ${item.title} ${item.dateLabel} ${item.typeLabel} ${item.isActive ? 'active' : 'inactive'}'
                     .toLowerCase();
             return searchable.contains(normalizedQuery);
           }).toList();
@@ -55,8 +63,9 @@ class _HistoryViewData {
             source: item,
             icon: _iconForBudgetType(item.type),
             title: item.name,
-            meta:
-                '${_dateLabel(item.createdAt)} • ${_labelForBudgetType(item.type)} • ${item.isActive ? 'Active' : 'Inactive'}',
+            dateLabel: _dateLabel(item.createdAt),
+            typeLabel: _labelForBudgetType(item.type),
+            isActive: item.isActive,
             amountCentavos: item.amountCentavos,
           );
         }).toList(),
@@ -84,14 +93,18 @@ class _HistoryItem {
     required this.source,
     required this.icon,
     required this.title,
-    required this.meta,
+    required this.dateLabel,
+    required this.typeLabel,
+    required this.isActive,
     required this.amountCentavos,
   });
 
   final history_domain.HistoryItem source;
   final IconData icon;
   final String title;
-  final String meta;
+  final String dateLabel;
+  final String typeLabel;
+  final bool isActive;
   final int amountCentavos;
 }
 

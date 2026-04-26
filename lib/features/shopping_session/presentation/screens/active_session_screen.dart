@@ -158,9 +158,14 @@ class ActiveSessionScreen extends StatelessWidget {
                     height: 50,
                     child: FilledButton.icon(
                       onPressed: ocrScannerEnabled ? onOpenScanner : null,
-                      icon: const Icon(Icons.qr_code_scanner, size: 18),
+                      icon: const Icon(
+                        Icons.document_scanner_outlined,
+                        size: 18,
+                      ),
                       label: Text(
-                        ocrScannerEnabled ? 'Scan Barcode' : 'OCR Disabled',
+                        ocrScannerEnabled
+                            ? 'Scan Label'
+                            : 'Label Scan Off',
                       ),
                       style: FilledButton.styleFrom(
                         backgroundColor: Colors.black,

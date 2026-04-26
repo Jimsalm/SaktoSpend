@@ -11,6 +11,7 @@ class SessionCartItemModel {
     required this.quantity,
     required this.unit,
     required this.isEssential,
+    required this.source,
     required this.createdAt,
   });
 
@@ -22,6 +23,7 @@ class SessionCartItemModel {
   final int quantity;
   final String unit;
   final bool isEssential;
+  final SessionCartItemSource source;
   final DateTime createdAt;
 
   factory SessionCartItemModel.fromMap(Map<String, Object?> map) {
@@ -34,6 +36,9 @@ class SessionCartItemModel {
       quantity: ((map['quantity'] as num?) ?? 1).toInt(),
       unit: (map['unit'] as String?) ?? 'PC',
       isEssential: ((map['is_essential'] as num?) ?? 0).toInt() == 1,
+      source: SessionCartItemSource.fromValue(
+        (map['source_type'] as String?) ?? 'manual',
+      ),
       createdAt:
           DateTime.tryParse((map['created_at'] as String?) ?? '') ??
           DateTime.now(),
@@ -52,6 +57,7 @@ class SessionCartItemModel {
       quantity: item.quantity,
       unit: item.unit,
       isEssential: item.isEssential,
+      source: item.source,
       createdAt: DateTime.now(),
     );
   }
@@ -64,6 +70,7 @@ class SessionCartItemModel {
       quantity: quantity,
       unit: unit,
       isEssential: isEssential,
+      source: source,
     );
   }
 
@@ -77,6 +84,7 @@ class SessionCartItemModel {
       'quantity': quantity,
       'unit': unit,
       'is_essential': isEssential ? 1 : 0,
+      'source_type': source.value,
       'created_at': createdAt.toIso8601String(),
     };
   }

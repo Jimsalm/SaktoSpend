@@ -1,3 +1,23 @@
+enum SessionCartItemSource {
+  manual('manual'),
+  voice('voice'),
+  labelScan('label_scan');
+
+  const SessionCartItemSource(this.value);
+
+  final String value;
+
+  static SessionCartItemSource fromValue(String raw) {
+    final normalized = raw.trim().toLowerCase();
+    for (final source in SessionCartItemSource.values) {
+      if (source.value == normalized) {
+        return source;
+      }
+    }
+    return SessionCartItemSource.manual;
+  }
+}
+
 class SessionCartItem {
   const SessionCartItem({
     required this.name,
@@ -6,6 +26,7 @@ class SessionCartItem {
     required this.quantity,
     this.unit = 'PC',
     this.isEssential = false,
+    this.source = SessionCartItemSource.manual,
   });
 
   final String name;
@@ -14,6 +35,7 @@ class SessionCartItem {
   final int quantity;
   final String unit;
   final bool isEssential;
+  final SessionCartItemSource source;
 
   int get totalPrice => unitPrice * quantity;
 
@@ -24,6 +46,7 @@ class SessionCartItem {
     int? quantity,
     String? unit,
     bool? isEssential,
+    SessionCartItemSource? source,
   }) {
     return SessionCartItem(
       name: name ?? this.name,
@@ -32,6 +55,7 @@ class SessionCartItem {
       quantity: quantity ?? this.quantity,
       unit: unit ?? this.unit,
       isEssential: isEssential ?? this.isEssential,
+      source: source ?? this.source,
     );
   }
 }

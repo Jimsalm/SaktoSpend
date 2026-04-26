@@ -534,6 +534,9 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       quantity: _quantity,
       unit: _unit,
       isEssential: _isEssential,
+      source: _manualOnlyMode
+          ? SessionCartItemSource.manual
+          : SessionCartItemSource.labelScan,
     );
     widget.onAddToCart(item);
   }

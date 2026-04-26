@@ -90,6 +90,8 @@ class AppDatabase {
         quantity INTEGER NOT NULL CHECK(quantity > 0),
         unit TEXT NOT NULL DEFAULT 'PC' CHECK(unit IN ('PC', 'KG')),
         is_essential INTEGER NOT NULL DEFAULT 0 CHECK(is_essential IN (0, 1)),
+        source_type TEXT NOT NULL DEFAULT 'manual'
+          CHECK(source_type IN ('manual', 'voice', 'label_scan')),
         created_at TEXT NOT NULL CHECK(length(trim(created_at)) > 0),
         FOREIGN KEY (budget_id) REFERENCES $budgetsTable(id) ON DELETE CASCADE
       )

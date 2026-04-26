@@ -90,9 +90,42 @@ class AppTheme {
           borderSide: BorderSide(color: tokens.accentStrong, width: 1.2),
         ),
       ),
+      dividerTheme: DividerThemeData(
+        color: tokens.borderSubtle,
+        thickness: 1,
+        space: 1,
+      ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        foregroundColor: Colors.white,
+        foregroundColor: tokens.textPrimary,
         backgroundColor: tokens.accentStrong,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      switchTheme: SwitchThemeData(
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return tokens.textPrimary;
+          }
+          return Colors.white;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return tokens.accentStrong;
+          }
+          return tokens.surfaceElevated;
+        }),
+      ),
+      sliderTheme: SliderThemeData(
+        trackHeight: 6,
+        activeTrackColor: tokens.accentStrong,
+        inactiveTrackColor: tokens.surfaceElevated,
+        thumbColor: tokens.accentStrong,
+        overlayColor: tokens.accentStrong.withValues(alpha: 0.16),
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

@@ -1,3 +1,4 @@
+import 'package:SaktoSpend/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class EmptyBudgetsCard extends StatelessWidget {
@@ -8,6 +9,7 @@ class EmptyBudgetsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
       child: Column(
@@ -35,17 +37,21 @@ class EmptyBudgetsCard extends StatelessWidget {
                   width: 82,
                   height: 82,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF4F2EE),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
+                    color: tokens.surfacePrimary,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
                       BoxShadow(
                         blurRadius: 18,
                         offset: Offset(0, 6),
-                        color: Color(0x13000000),
+                        color: tokens.shadowColor,
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.pie_chart_rounded, size: 46),
+                  child: const Icon(
+                    Icons.pie_chart_rounded,
+                    size: 46,
+                    color: Color(0xFF69A80D),
+                  ),
                 ),
               ],
             ),
@@ -63,30 +69,26 @@ class EmptyBudgetsCard extends StatelessWidget {
             "You haven't set any budgets for this month. Start by creating your first budget allocation.",
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: const Color(0xFF6A665F),
+              color: tokens.textSecondary,
             ),
           ),
           const SizedBox(height: 22),
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF2D2D2D), Color(0xFF101010)],
-              ),
-              boxShadow: const [
+              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFA4ED23),
+              boxShadow: [
                 BoxShadow(
                   blurRadius: 10,
                   offset: Offset(0, 3),
-                  color: Color(0x22000000),
+                  color: tokens.shadowColor,
                 ),
               ],
             ),
             child: TextButton(
               onPressed: onCreatePressed,
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: const Color(0xFF0D1530),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -95,7 +97,7 @@ class EmptyBudgetsCard extends StatelessWidget {
               child: Text(
                 '+  Create First Budget',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white,
+                  color: const Color(0xFF0D1530),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -106,15 +108,16 @@ class EmptyBudgetsCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0EEEA),
-              borderRadius: BorderRadius.circular(10),
+              color: tokens.surfacePrimary,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: tokens.borderSubtle),
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.lightbulb_outline,
                   size: 18,
-                  color: Color(0xFF7B766D),
+                  color: tokens.textSecondary,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -122,6 +125,7 @@ class EmptyBudgetsCard extends StatelessWidget {
                     'TIP: BUDGETS HELP YOU SAVE 20% MORE MONTHLY',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
+                      color: tokens.textSecondary,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.7,
                     ),
@@ -143,14 +147,15 @@ class _FloatIconCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = context.appThemeTokens;
     return Container(
       width: 54,
       height: 54,
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F2EE),
-        borderRadius: BorderRadius.circular(10),
+        color: tokens.surfaceSecondary,
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(icon, size: 24, color: const Color(0xFF8D887F)),
+      child: Icon(icon, size: 24, color: tokens.textSecondary),
     );
   }
 }

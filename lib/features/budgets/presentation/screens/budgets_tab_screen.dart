@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/core/theme/app_theme.dart';
 import 'package:SaktoSpend/core/utils/utils.dart';
 import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
 import 'package:SaktoSpend/features/budgets/presentation/widgets/budget_allocation_card.dart';
@@ -94,36 +95,69 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
     Map<String, int> sessionSpentByBudget,
   ) {
     final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     final viewData = _buildBudgetsViewData(budgets, sessionSpentByBudget);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(22, 12, 22, 16),
+      padding: const EdgeInsets.fromLTRB(26, 20, 26, 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                'Budgets',
-                style: theme.textTheme.headlineMedium?.copyWith(fontSize: 52),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Budgets',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontSize: 42,
+                      color: tokens.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _monthYearLabel(DateTime.now()),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontSize: 18,
+                      color: tokens.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
               const Spacer(),
               Container(
-                width: 54,
-                height: 54,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(16),
+                  color: const Color(0xFF20242C),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.black.withValues(alpha: 0.08),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: tokens.shadowColor,
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.person, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.person,
+                  color: Color(0xFFFFD658),
+                  size: 30,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 26),
+          const SizedBox(height: 18),
           Text(
             'Managing ${viewData.activeItems.length} active allocations for ${_monthYearLabel(DateTime.now())}.',
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: const Color(0xFF4D4942),
+              color: tokens.textSecondary,
             ),
           ),
           if (viewData.activeItems.isEmpty &&
@@ -138,26 +172,35 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
                 utilization: viewData.averageUtilization,
                 statusLabel: viewData.overallStatus.label,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               Row(
                 children: [
                   Text(
                     'ACTIVE BUDGETS',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      letterSpacing: 3,
+                      letterSpacing: 2.4,
                       fontWeight: FontWeight.w700,
+                      color: tokens.textSecondary,
                     ),
                   ),
                   const Spacer(),
-                  const Icon(Icons.filter_list, size: 18),
+                  Icon(
+                    Icons.filter_list_rounded,
+                    size: 20,
+                    color: tokens.textSecondary,
+                  ),
                   const SizedBox(width: 14),
-                  const Icon(Icons.tune, size: 18),
+                  Icon(
+                    Icons.tune_rounded,
+                    size: 20,
+                    color: tokens.textSecondary,
+                  ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               ...viewData.activeItems.map(
                 (item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(bottom: 14),
                   child: BudgetAllocationCard(
                     icon: _iconForType(item.budget.type),
                     name: item.budget.name,
@@ -180,19 +223,19 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
               ),
             ],
             if (viewData.inactiveItems.isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 'INACTIVE BUDGETS',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  letterSpacing: 3,
+                  letterSpacing: 2.4,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF9A948B),
+                  color: tokens.textTertiary,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               ...viewData.inactiveItems.map(
                 (item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(bottom: 14),
                   child: BudgetAllocationCard(
                     icon: _iconForType(item.budget.type),
                     name: item.budget.name,
@@ -235,10 +278,7 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
     final result = await showModalBottomSheet<_BudgetFormValue>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFF8F7F4),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) => _BudgetFormDialog(
         initial: initial,
         defaultWarningPercent: defaultWarningPercent,
@@ -400,6 +440,7 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
   Widget build(BuildContext context) {
     final isEditing = widget.initial != null;
     final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     final viewInsets = MediaQuery.of(context).viewInsets;
     final maxSheetHeight = MediaQuery.of(context).size.height * 0.92;
 
@@ -409,253 +450,427 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
       padding: EdgeInsets.only(bottom: viewInsets.bottom),
       child: SafeArea(
         top: false,
-        child: ConstrainedBox(
+        child: Container(
           constraints: BoxConstraints(maxHeight: maxSheetHeight),
+          decoration: BoxDecoration(
+            color: tokens.backgroundCanvas,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            boxShadow: [
+              BoxShadow(
+                color: tokens.shadowColor,
+                blurRadius: 28,
+                offset: const Offset(0, -8),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 46,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: tokens.borderSubtle,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(18, 16, 12, 16),
+                padding: const EdgeInsets.fromLTRB(22, 18, 18, 18),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      isEditing ? 'Edit Budget' : 'New Budget',
-                      style: theme.textTheme.titleLarge?.copyWith(fontSize: 32),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isEditing ? 'Edit Budget' : 'New Budget',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontSize: 34,
+                              color: tokens.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            isEditing
+                                ? 'Refine the amount, type, and warning level for this budget.'
+                                : 'Set a spending limit, choose the budget type, and control alerts.',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: tokens.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
+                    const SizedBox(width: 16),
+                    _SheetIconButton(
+                      icon: Icons.close_rounded,
+                      onTap: () => Navigator.pop(context),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              const Divider(),
               Expanded(
                 child: SingleChildScrollView(
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
+                  padding: const EdgeInsets.fromLTRB(22, 18, 22, 14),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _FieldLabelText('Budget Name'),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            hintText: 'e.g.,  Groceries',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a budget name';
-                            }
-                            return null;
-                          },
+                        _BudgetFormHeroCard(
+                          typeLabel: _selectedType != null
+                              ? _labelForType(_selectedType!)
+                              : 'Budget',
+                          isActive: _isActive,
+                          isEditing: isEditing,
                         ),
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _FieldLabelText('Total Amount'),
-                                  const SizedBox(height: 8),
-                                  TextFormField(
-                                    controller: _amountController,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    decoration: InputDecoration(
-                                      prefixText:
-                                          '${MoneyUtils.currencySymbol} ',
-                                      hintText: '0.00',
-                                    ),
-                                    validator: (value) {
-                                      final parsed = _parseCurrency(value);
-                                      if (parsed == null || parsed <= 0) {
-                                        return 'Invalid';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
+                        const SizedBox(height: 16),
+                        _BudgetFormSectionCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _FormSectionTitle(
+                                title: 'Budget Details',
+                                subtitle:
+                                    'Name this budget and set the total amount you want to manage.',
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _FieldLabelText('Category'),
-                                  const SizedBox(height: 8),
-                                  DropdownButtonFormField<BudgetType?>(
-                                    initialValue: _selectedType,
-                                    items: [
-                                      ..._selectableBudgetTypes.map(
-                                        (type) => DropdownMenuItem<BudgetType?>(
-                                          value: type,
-                                          child: Text(_labelForType(type)),
+                              const SizedBox(height: 18),
+                              const _FieldLabelText('Budget Name'),
+                              const SizedBox(height: 8),
+                              TextFormField(
+                                controller: _nameController,
+                                textCapitalization:
+                                    TextCapitalization.words,
+                                decoration: const InputDecoration(
+                                  hintText: 'e.g., Groceries',
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter a budget name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 14),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final amountField = Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const _FieldLabelText('Total Amount'),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: _amountController,
+                                        keyboardType:
+                                            const TextInputType.numberWithOptions(
+                                              decimal: true,
+                                            ),
+                                        decoration: InputDecoration(
+                                          prefixText:
+                                              '${MoneyUtils.currencySymbol} ',
+                                          hintText: '0.00',
                                         ),
+                                        validator: (value) {
+                                          final parsed = _parseCurrency(value);
+                                          if (parsed == null || parsed <= 0) {
+                                            return 'Enter a valid amount';
+                                          }
+                                          return null;
+                                        },
                                       ),
                                     ],
-                                    onChanged: (value) {
-                                      setState(() => _selectedType = value);
-                                    },
-                                    validator: (value) {
-                                      if (value == null) {
-                                        return 'Required';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: const InputDecoration(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF2F0EC),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _FieldLabelText('Active'),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      _isActive
-                                          ? 'Included in active budgets'
-                                          : 'Hidden from active budgets',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: const Color(0xFF6A665F),
+                                  );
+                                  final categoryField = Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const _FieldLabelText('Type'),
+                                      const SizedBox(height: 8),
+                                      DropdownButtonFormField<BudgetType?>(
+                                        initialValue: _selectedType,
+                                        isExpanded: true,
+                                        dropdownColor: tokens.surfacePrimary,
+                                        borderRadius: BorderRadius.circular(18),
+                                        icon: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: tokens.textSecondary,
+                                        ),
+                                        style: theme.textTheme.bodyLarge
+                                            ?.copyWith(
+                                              color: tokens.textPrimary,
+                                            ),
+                                        items: [
+                                          ..._selectableBudgetTypes.map(
+                                            (type) =>
+                                                DropdownMenuItem<BudgetType?>(
+                                                  value: type,
+                                                  child: Text(
+                                                    _labelForType(type),
+                                                  ),
+                                                ),
                                           ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Switch.adaptive(
-                                value: _isActive,
-                                onChanged: (value) {
-                                  setState(() => _isActive = value);
+                                        ],
+                                        onChanged: (value) {
+                                          setState(() => _selectedType = value);
+                                        },
+                                        validator: (value) {
+                                          if (value == null) {
+                                            return 'Required';
+                                          }
+                                          return null;
+                                        },
+                                        decoration: const InputDecoration(),
+                                      ),
+                                    ],
+                                  );
+
+                                  if (constraints.maxWidth < 420) {
+                                    return Column(
+                                      children: [
+                                        amountField,
+                                        const SizedBox(height: 14),
+                                        categoryField,
+                                      ],
+                                    );
+                                  }
+
+                                  return Row(
+                                    children: [
+                                      Expanded(child: amountField),
+                                      const SizedBox(width: 12),
+                                      Expanded(child: categoryField),
+                                    ],
+                                  );
                                 },
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            const _FieldLabelText('Warning Threshold'),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
+                        const SizedBox(height: 14),
+                        _BudgetFormSectionCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _FormSectionTitle(
+                                title: 'Budget Settings',
+                                subtitle:
+                                    'Control whether this budget is active and when the warning should appear.',
                               ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE9E6E1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                '${_warningPercent.toStringAsFixed(0)}%',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
+                              const SizedBox(height: 18),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: tokens.surfaceSecondary,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: tokens.borderSubtle,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: tokens.surfacePrimary,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Icon(
+                                        _isActive
+                                            ? Icons.bolt_rounded
+                                            : Icons.pause_circle_outline_rounded,
+                                        color: _isActive
+                                            ? tokens.accentStrong
+                                            : tokens.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Active Budget',
+                                            style: theme.textTheme.titleMedium
+                                                ?.copyWith(
+                                                  color: tokens.textPrimary,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _isActive
+                                                ? 'Included in your active budget list and ready for shopping.'
+                                                : 'Saved for later and hidden from the active budget list.',
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  color: tokens.textSecondary,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Switch.adaptive(
+                                      value: _isActive,
+                                      onChanged: (value) {
+                                        setState(() => _isActive = value);
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 3,
-                            thumbShape: const RoundSliderThumbShape(
-                              enabledThumbRadius: 7,
-                            ),
-                          ),
-                          child: Slider(
-                            value: _warningPercent,
-                            min: 0,
-                            max: 100,
-                            onChanged: (value) {
-                              setState(() => _warningPercent = value);
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: Row(
-                            children: [
-                              Text('0%', style: theme.textTheme.bodyMedium),
-                              const Spacer(),
-                              Text('50%', style: theme.textTheme.bodyMedium),
-                              const Spacer(),
-                              Text('100%', style: theme.textTheme.bodyMedium),
+                              const SizedBox(height: 16),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.fromLTRB(
+                                  14,
+                                  14,
+                                  14,
+                                  12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: tokens.surfaceSecondary,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: tokens.borderSubtle,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const _FieldLabelText(
+                                          'Warning Threshold',
+                                        ),
+                                        const Spacer(),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: tokens.surfacePrimary,
+                                            borderRadius:
+                                                BorderRadius.circular(999),
+                                            border: Border.all(
+                                              color: tokens.borderSubtle,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${_warningPercent.toStringAsFixed(0)}%',
+                                            style: theme.textTheme.bodyLarge
+                                                ?.copyWith(
+                                                  color: tokens.textPrimary,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Slider(
+                                      value: _warningPercent,
+                                      min: 0,
+                                      max: 100,
+                                      onChanged: (value) {
+                                        setState(() => _warningPercent = value);
+                                      },
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 2,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            '0%',
+                                            style: theme.textTheme.bodyMedium,
+                                          ),
+                                          const Spacer(),
+                                          Text(
+                                            '50%',
+                                            style: theme.textTheme.bodyMedium,
+                                          ),
+                                          const Spacer(),
+                                          Text(
+                                            '100%',
+                                            style: theme.textTheme.bodyMedium,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "We'll notify you when spending reaches this level.",
+                                      style: theme.textTheme.bodyLarge
+                                          ?.copyWith(
+                                            color: tokens.textSecondary,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "We'll notify you when spending reaches this level.",
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: const Color(0xFF6A665F),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
                       ],
                     ),
                   ),
                 ),
               ),
-              const Divider(height: 1),
+              const Divider(),
               Padding(
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
+                padding: const EdgeInsets.fromLTRB(22, 14, 22, 18),
                 child: Row(
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('Cancel', style: theme.textTheme.titleMedium),
-                    ),
-                    const Spacer(),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Color(0xFF2D2D2D), Color(0xFF101010)],
-                        ),
-                      ),
-                      child: TextButton(
-                        onPressed: _onSubmit,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: tokens.textPrimary,
+                          backgroundColor: tokens.surfacePrimary,
+                          side: BorderSide(color: tokens.borderSubtle),
+                          minimumSize: const Size.fromHeight(54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
                           ),
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: FilledButton(
+                        onPressed: _onSubmit,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: tokens.accentStrong,
+                          foregroundColor: tokens.textPrimary,
+                          minimumSize: const Size.fromHeight(54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          elevation: 0,
                         ),
                         child: Text(
                           isEditing ? 'Save Budget' : 'Create Budget',
                           style: theme.textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
+                            color: tokens.textPrimary,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
@@ -724,14 +939,250 @@ class _FieldLabelText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
         text,
         style: theme.textTheme.titleMedium?.copyWith(
+          color: tokens.textPrimary,
           fontWeight: FontWeight.w700,
         ),
       ),
+    );
+  }
+}
+
+class _SheetIconButton extends StatelessWidget {
+  const _SheetIconButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.appThemeTokens;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: tokens.surfacePrimary,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: tokens.borderSubtle),
+          ),
+          child: Icon(icon, color: tokens.textPrimary, size: 22),
+        ),
+      ),
+    );
+  }
+}
+
+class _BudgetFormHeroCard extends StatelessWidget {
+  const _BudgetFormHeroCard({
+    required this.typeLabel,
+    required this.isActive,
+    required this.isEditing,
+  });
+
+  final String typeLabel;
+  final bool isActive;
+  final bool isEditing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      decoration: BoxDecoration(
+        color: tokens.surfacePrimary,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: tokens.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: tokens.shadowColor,
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+        gradient: RadialGradient(
+          center: const Alignment(0.88, -0.08),
+          radius: 1.1,
+          colors: [
+            tokens.accentSoft.withValues(alpha: 0.95),
+            Colors.white.withValues(alpha: 0.97),
+            Colors.white,
+          ],
+          stops: const [0.0, 0.42, 1.0],
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isEditing ? 'BUDGET UPDATE' : 'BUDGET SETUP',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    letterSpacing: 1.8,
+                    color: tokens.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  isEditing
+                      ? 'Keep this budget in sync with how you\'re spending now.'
+                      : 'Build a budget that matches how you want to spend this month.',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontSize: 24,
+                    color: tokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _HeroTag(
+                      icon: Icons.layers_rounded,
+                      label: typeLabel,
+                    ),
+                    _HeroTag(
+                      icon: isActive
+                          ? Icons.bolt_rounded
+                          : Icons.pause_circle_outline_rounded,
+                      label: isActive ? 'Active' : 'Inactive',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 18),
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.94),
+              shape: BoxShape.circle,
+              border: Border.all(color: tokens.borderSubtle),
+            ),
+            child: Icon(
+              Icons.account_balance_wallet_rounded,
+              color: tokens.accentStrong,
+              size: 30,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroTag extends StatelessWidget {
+  const _HeroTag({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: tokens.borderSubtle),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: tokens.textSecondary),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: tokens.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BudgetFormSectionCard extends StatelessWidget {
+  const _BudgetFormSectionCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.appThemeTokens;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      decoration: BoxDecoration(
+        color: tokens.surfacePrimary,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: tokens.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: tokens.shadowColor,
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _FormSectionTitle extends StatelessWidget {
+  const _FormSectionTitle({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontSize: 20,
+            color: tokens.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: tokens.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/core/theme/app_theme.dart';
 import 'package:SaktoSpend/core/utils/utils.dart';
 import 'package:SaktoSpend/features/budgets/presentation/screens/budgets_tab_screen.dart';
 import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
@@ -147,7 +148,7 @@ class _AppHomeScreenState extends ConsumerState<AppHomeScreen> {
         onTap: () {
           (_budgetsCreateAction ?? () {})();
         },
-        size: 54,
+        size: 58,
       );
     }
 
@@ -432,31 +433,54 @@ class _DarkFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = context.appThemeTokens;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF2D2D2D), Color(0xFF101010)],
-            ),
-            boxShadow: const [
+            color: tokens.accentStrong,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
+            boxShadow: [
               BoxShadow(
-                blurRadius: 14,
+                blurRadius: 18,
                 spreadRadius: 0,
-                offset: Offset(0, 6),
-                color: Color(0x22000000),
+                offset: const Offset(0, 10),
+                color: tokens.shadowColor,
               ),
             ],
           ),
-          child: const Icon(Icons.add, color: Colors.white, size: 28),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.22),
+                        Colors.white.withValues(alpha: 0.02),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Center(
+                child: Icon(
+                  Icons.add_rounded,
+                  color: tokens.textPrimary,
+                  size: 30,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

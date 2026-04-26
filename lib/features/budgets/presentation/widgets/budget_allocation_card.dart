@@ -1,3 +1,4 @@
+import 'package:SaktoSpend/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class BudgetAllocationCard extends StatelessWidget {
@@ -39,34 +40,49 @@ class BudgetAllocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final titleColor = isInactive ? const Color(0xFF8E897F) : null;
-    final bodyColor = isInactive ? const Color(0xFFA29D94) : const Color(0xFF36322C);
-    final iconBg = isInactive ? const Color(0xFFF4F2EE) : const Color(0xFFF0EEEA);
-    final iconColor = isInactive ? const Color(0xFFA9A39A) : null;
-    final barValueColor = isInactive ? const Color(0xFF8E897F) : const Color(0xFF111111);
-    final barTrackColor = isInactive ? const Color(0xFFE9E6E0) : const Color(0xFFE2DFD9);
+    final tokens = context.appThemeTokens;
+    final titleColor = isInactive ? tokens.textTertiary : tokens.textPrimary;
+    final bodyColor = isInactive ? tokens.textTertiary : tokens.textSecondary;
+    final iconBg = isInactive ? tokens.surfaceSecondary : tokens.surfaceElevated;
+    final iconColor = isInactive ? tokens.textTertiary : tokens.textPrimary;
+    final barValueColor = isInactive
+        ? tokens.textTertiary
+        : const Color(0xFF93E71A);
+    final barTrackColor = const Color(0xFFD9E0EB);
     final leftColor = isInactive
-        ? const Color(0xFFA29D94)
+        ? tokens.textTertiary
         : isNegativeLeft
-            ? const Color(0xFFBB1414)
-            : const Color(0xFF3C3832);
+            ? tokens.warningStrong
+            : tokens.textPrimary;
 
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: tokens.surfacePrimary,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: tokens.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: tokens.shadowColor,
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(24),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 22, 20, 14),
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
           child: Column(
             children: [
               Row(
                 children: [
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: 62,
+                    height: 62,
                     decoration: BoxDecoration(
                       color: iconBg,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(icon, size: 22, color: iconColor),
                   ),
@@ -78,34 +94,44 @@ class BudgetAllocationCard extends StatelessWidget {
                         Text(
                           name,
                           style: theme.textTheme.titleLarge?.copyWith(
+                            fontSize: 24,
                             color: titleColor,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         Text(
                           '$spentText of $totalText',
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: bodyColor,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       PopupMenuButton<_BudgetCardMenuAction>(
                         padding: EdgeInsets.zero,
-                        color: const Color(0xFFF1ECE2),
+                        color: tokens.surfacePrimary,
                         elevation: 2,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         constraints: const BoxConstraints(
                           minWidth: 32,
                           minHeight: 32,
                         ),
-                        icon: const Icon(Icons.more_vert, size: 20),
+                        icon: Icon(
+                          Icons.more_horiz_rounded,
+                          size: 22,
+                          color: tokens.textSecondary,
+                        ),
                         onSelected: (action) {
                           if (action == _BudgetCardMenuAction.edit) {
                             onEdit();
@@ -122,7 +148,7 @@ class BudgetAllocationCard extends StatelessWidget {
                                 Icon(
                                   Icons.edit_outlined,
                                   size: 18,
-                                  color: Color(0xFF7D7870),
+                                  color: Color(0xFF607496),
                                 ),
                                 SizedBox(width: 10),
                                 Text('Edit'),
@@ -138,12 +164,12 @@ class BudgetAllocationCard extends StatelessWidget {
                                 Icon(
                                   Icons.delete_outline_rounded,
                                   size: 18,
-                                  color: Color(0xFFC41212),
+                                  color: Color(0xFFE52420),
                                 ),
                                 SizedBox(width: 10),
                                 Text(
                                   'Delete',
-                                  style: TextStyle(color: Color(0xFFC41212)),
+                                  style: TextStyle(color: Color(0xFFE52420)),
                                 ),
                               ],
                             ),
@@ -155,30 +181,29 @@ class BudgetAllocationCard extends StatelessWidget {
                         label: statusLabel,
                         bgColor: statusBadgeBg,
                         textColor: statusBadgeColor,
+                        isInactive: isInactive,
                       ),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               ClipRRect(
                 borderRadius: BorderRadius.circular(999),
                 child: LinearProgressIndicator(
-                  minHeight: 5,
+                  minHeight: 8,
                   value: utilization.clamp(0.0, 1.0).toDouble(),
                   valueColor: AlwaysStoppedAnimation(barValueColor),
                   backgroundColor: barTrackColor,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Text(
                     utilizationText,
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: isInactive
-                          ? const Color(0xFFA29D94)
-                          : const Color(0xFF3C3832),
+                      color: isInactive ? tokens.textTertiary : tokens.textSecondary,
                     ),
                   ),
                   const Spacer(),
@@ -206,20 +231,22 @@ class _BudgetStatusBadge extends StatelessWidget {
     required this.label,
     required this.bgColor,
     required this.textColor,
+    required this.isInactive,
   });
 
   final String label;
   final Color bgColor;
   final Color textColor;
+  final bool isInactive;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(4),
+        color: isInactive ? bgColor.withValues(alpha: 0.82) : bgColor,
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,

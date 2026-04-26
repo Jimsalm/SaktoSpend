@@ -1,13 +1,5 @@
 part of 'scan_review_screen.dart';
 
-String _extractBarcodeCode(BarcodeCapture capture) {
-  return capture.barcodes
-      .map((barcode) => barcode.rawValue ?? barcode.displayValue)
-      .whereType<String>()
-      .map((value) => value.trim())
-      .firstWhere((value) => value.isNotEmpty, orElse: () => '');
-}
-
 ScannerOcrProduct? extractScannerOcrProduct(List<ScannerOcrLine> ocrLines) {
   final normalized = ocrLines
       .map(
@@ -207,15 +199,6 @@ bool _isReliableExtractedPrice(int price) {
   }
   // Ignore obviously noisy OCR values (e.g., accidental huge readings).
   return price <= 50000000; // up to 500,000.00
-}
-
-String _buildExtractKey(ScannerOcrProduct extracted) {
-  final normalizedName = extracted.name
-      .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
-  return '$normalizedName|${extracted.price}';
 }
 
 class ScannerOcrProduct {

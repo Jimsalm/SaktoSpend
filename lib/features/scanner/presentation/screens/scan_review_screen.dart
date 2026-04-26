@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:SaktoSpend/core/utils/utils.dart';
 import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
@@ -8,7 +6,6 @@ import 'package:SaktoSpend/features/shopping_session/domain/entities/session_car
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 
 part 'scan_review_screen_logic.dart';
 
@@ -35,14 +32,6 @@ class ScanReviewScreen extends StatefulWidget {
 }
 
 class _ScanReviewScreenState extends State<ScanReviewScreen> {
-  static const Duration _captureCooldown = Duration(milliseconds: 550);
-  static const int _requiredStableDetections = 2;
-
-  final MobileScannerController _cameraController = MobileScannerController(
-    detectionSpeed: DetectionSpeed.normal,
-    facing: CameraFacing.back,
-    returnImage: true,
-  );
   final TextRecognizer _textRecognizer = TextRecognizer(
     script: TextRecognitionScript.latin,
   );
@@ -66,11 +55,7 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
   bool _isEssential = false;
   bool _showEntry = false;
   bool _isProcessingCapture = false;
-  bool _isCameraStopped = false;
   bool _manualOnlyMode = false;
-  DateTime? _lastCaptureAt;
-  String? _lastExtractKey;
-  int _stableExtractHits = 0;
 
   @override
   void initState() {
@@ -78,14 +63,11 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
     _manualOnlyMode = widget.initialManualEntry;
     if (widget.initialManualEntry) {
       _showEntry = true;
-      _isCameraStopped = true;
-      unawaited(_cameraController.stop());
     }
   }
 
   @override
   void dispose() {
-    _cameraController.dispose();
     unawaited(_textRecognizer.close());
     _nameController.dispose();
     _priceController.dispose();
@@ -108,24 +90,23 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: _manualOnlyMode
-                ? const ColoredBox(color: Color(0xFFF2F0EC))
-                : MobileScanner(
-                    controller: _cameraController,
-                    onDetect: _onDetect,
-                  ),
+            child: ColoredBox(
+              color: _manualOnlyMode
+                  ? const Color(0xFFF2F0EC)
+                  : const Color(0xFFECE8E0),
+            ),
           ),
           if (!_manualOnlyMode)
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
-                      Colors.black.withValues(alpha: 0.34),
-                      Colors.black.withValues(alpha: 0.12),
-                      Colors.black.withValues(alpha: 0.24),
+                      Colors.white.withValues(alpha: 0.16),
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.05),
                     ],
                   ),
                 ),
@@ -146,54 +127,88 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
           if (!_manualOnlyMode)
             Center(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(34, 24, 34, 160),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      constraints: const BoxConstraints(
-                        maxWidth: 320,
-                        minHeight: 220,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      constraints: const BoxConstraints(maxWidth: 320),
-                      padding: const EdgeInsets.symmetric(horizontal: 22),
-                      child: Container(
-                        height: 2,
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
+                padding: const EdgeInsets.fromLTRB(28, 36, 28, 190),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 106,
+                        height: 106,
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(999),
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(24),
                         ),
-                        child: Text(
-                          _captureLabel(hasScan),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
+                        child: const Icon(
+                          Icons.document_scanner_outlined,
+                          color: Colors.white,
+                          size: 48,
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      Text(
+                        hasScan ? 'Label Ready' : 'Scan Product Label',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF171512),
+                            ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _captureLabel(hasScan),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: const Color(0xFF5E5952),
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.black.withValues(alpha: 0.08),
                           ),
                         ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF0ECE4),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.sell_outlined,
+                                size: 22,
+                                color: Color(0xFF1A1814),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Text(
+                                hasScan
+                                    ? 'Review the extracted name and price before adding the item.'
+                                    : 'Take a clear photo of the label where the product name and price are visible.',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: const Color(0xFF423D37),
+                                      height: 1.3,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -201,7 +216,7 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
             Positioned(
               left: 14,
               right: 14,
-              bottom: 20,
+              bottom: 92,
               child: _ScannedProductCard(
                 product: _scannedProduct!,
                 onTap: _openEntry,
@@ -216,25 +231,10 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _scanLabelPhoto,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
-                        backgroundColor: Colors.black.withValues(alpha: 0.25),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                      ),
-                      icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                      label: const Text('Photo Scan'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
                     child: FilledButton.icon(
-                      onPressed: _openManualEntry,
+                      onPressed: _isProcessingCapture
+                          ? null
+                          : () => _scanLabel(ImageSource.camera),
                       style: FilledButton.styleFrom(
                         backgroundColor: Colors.black,
                         foregroundColor: Colors.white,
@@ -243,8 +243,29 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
                           vertical: 10,
                         ),
                       ),
-                      icon: const Icon(Icons.edit_note, size: 18),
-                      label: const Text('Manual Entry'),
+                      icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                      label: const Text('Take Label Photo'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _isProcessingCapture
+                          ? null
+                          : () => _scanLabel(ImageSource.gallery),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        side: BorderSide(
+                          color: Colors.black.withValues(alpha: 0.16),
+                        ),
+                        backgroundColor: Colors.white.withValues(alpha: 0.72),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                      ),
+                      icon: const Icon(Icons.photo_library_outlined, size: 18),
+                      label: const Text('Choose Photo'),
                     ),
                   ),
                 ],
@@ -253,16 +274,17 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
           if (!_manualOnlyMode && hasScan)
             Positioned(
               left: 14,
+              right: 14,
               bottom: 22,
               child: OutlinedButton.icon(
                 onPressed: _restartScanner,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white),
-                  backgroundColor: Colors.black.withValues(alpha: 0.25),
+                  foregroundColor: Colors.black,
+                  side: BorderSide(color: Colors.black.withValues(alpha: 0.16)),
+                  backgroundColor: Colors.white.withValues(alpha: 0.72),
                 ),
                 icon: const Icon(Icons.refresh),
-                label: const Text('Scan Again'),
+                label: const Text('Capture Again'),
               ),
             ),
           if (_showEntry)
@@ -343,11 +365,8 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
 
   String _captureLabel(bool hasScan) {
     if (_isProcessingCapture) return 'Reading product details...';
-    if (!hasScan && _stableExtractHits > 0) {
-      return 'Hold steady ($_stableExtractHits/$_requiredStableDetections)';
-    }
-    if (hasScan) return 'Product detected';
-    return 'Align product label inside frame';
+    if (hasScan) return 'The product name and price were extracted from the label.';
+    return 'Use a label photo so the product name and price are easy to read.';
   }
 
   int get _unitPrice =>
@@ -359,74 +378,6 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       return;
     }
     widget.onBack();
-  }
-
-  void _onDetect(BarcodeCapture capture) {
-    if (_showEntry || _isProcessingCapture || _isCameraStopped) {
-      return;
-    }
-    final now = DateTime.now();
-    final last = _lastCaptureAt;
-    if (last != null && now.difference(last) < _captureCooldown) {
-      return;
-    }
-    _lastCaptureAt = now;
-    unawaited(_handleCapture(capture));
-  }
-
-  Future<void> _handleCapture(BarcodeCapture capture) async {
-    final imageBytes = capture.image;
-    if (imageBytes == null || imageBytes.isEmpty) {
-      return;
-    }
-    setState(() => _isProcessingCapture = true);
-
-    try {
-      final extracted = await _extractProductDetails(imageBytes);
-      if (!mounted) return;
-
-      if (extracted == null) {
-        _stableExtractHits = 0;
-        _lastExtractKey = null;
-        setState(() => _isProcessingCapture = false);
-        return;
-      }
-
-      final extractKey = _buildExtractKey(extracted);
-      if (extractKey == _lastExtractKey) {
-        _stableExtractHits += 1;
-      } else {
-        _lastExtractKey = extractKey;
-        _stableExtractHits = 1;
-      }
-      if (_stableExtractHits < _requiredStableDetections) {
-        setState(() => _isProcessingCapture = false);
-        return;
-      }
-
-      await _cameraController.stop();
-      if (!mounted) return;
-
-      _applyExtractedProduct(extracted, code: _extractBarcodeCode(capture));
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _isProcessingCapture = false);
-    }
-  }
-
-  Future<ScannerOcrProduct?> _extractProductDetails(Uint8List bytes) async {
-    final tempFile = File(
-      '${Directory.systemTemp.path}${Platform.pathSeparator}scan_${DateTime.now().microsecondsSinceEpoch}.png',
-    );
-
-    await tempFile.writeAsBytes(bytes, flush: true);
-    try {
-      return _extractProductDetailsFromPath(tempFile.path);
-    } finally {
-      if (await tempFile.exists()) {
-        await tempFile.delete();
-      }
-    }
   }
 
   Future<ScannerOcrProduct?> _extractProductDetailsFromPath(String path) async {
@@ -458,21 +409,8 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
     return extractScannerOcrProduct(ocrLines);
   }
 
-  Future<void> _scanLabelPhoto() async {
-    if (_showEntry || _isProcessingCapture || _isCameraStopped) {
-      return;
-    }
-
-    _resetScannerStability();
-    _isCameraStopped = true;
-    await _cameraController.stop();
-
-    final source = await _pickImageSource();
-    if (!mounted) {
-      return;
-    }
-    if (source == null) {
-      await _resumeCameraScanning();
+  Future<void> _scanLabel(ImageSource source) async {
+    if (_showEntry || _isProcessingCapture) {
       return;
     }
 
@@ -487,7 +425,7 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
         return;
       }
       if (picked == null) {
-        await _resumeCameraScanning();
+        setState(() => _isProcessingCapture = false);
         return;
       }
 
@@ -496,11 +434,11 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
         return;
       }
       if (extracted == null) {
+        setState(() => _isProcessingCapture = false);
         AppSnackbars.showError(
           context,
           'No product name and price were detected from that photo.',
         );
-        await _resumeCameraScanning();
         return;
       }
 
@@ -509,66 +447,19 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       if (!mounted) {
         return;
       }
-      AppSnackbars.showError(context, 'Failed to scan product photo.');
-      await _resumeCameraScanning();
+      setState(() => _isProcessingCapture = false);
+      AppSnackbars.showError(context, 'Failed to scan product label.');
     }
   }
 
-  Future<ImageSource?> _pickImageSource() {
-    return showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: const Color(0xFFF8F7F4),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_camera_outlined),
-                  title: const Text('Take Photo'),
-                  onTap: () => Navigator.of(context).pop(ImageSource.camera),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.photo_library_outlined),
-                  title: const Text('Choose Photo'),
-                  onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _resumeCameraScanning() async {
-    if (!mounted || _manualOnlyMode || _showEntry) {
-      return;
-    }
-
-    setState(() {
-      _isProcessingCapture = false;
-      _isCameraStopped = false;
-    });
-
-    await _cameraController.start();
-  }
-
-  void _applyExtractedProduct(ScannerOcrProduct extracted, {String code = ''}) {
+  void _applyExtractedProduct(ScannerOcrProduct extracted) {
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _isCameraStopped = true;
       _isProcessingCapture = false;
       _scannedProduct = _ScannedProduct(
-        code: code,
         name: extracted.name,
         category: _category,
         unitPrice: extracted.price,
@@ -580,7 +471,6 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
   }
 
   void _openManualEntry() {
-    _resetScannerStability();
     setState(() {
       _scannedProduct = null;
       _nameController.clear();
@@ -591,14 +481,10 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       _isEssential = false;
       _showEntry = true;
     });
-    _isCameraStopped = true;
-    unawaited(_cameraController.stop());
   }
 
   void _openEntry() {
     setState(() => _showEntry = true);
-    _isCameraStopped = true;
-    unawaited(_cameraController.stop());
   }
 
   void _closeEntry() {
@@ -610,10 +496,8 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
   }
 
   void _restartScanner() {
-    _resetScannerStability();
     setState(() {
       _isProcessingCapture = false;
-      _isCameraStopped = false;
       _scannedProduct = null;
       _nameController.clear();
       _priceController.clear();
@@ -622,13 +506,6 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       _unit = 'PC';
       _isEssential = false;
     });
-    unawaited(_cameraController.start());
-  }
-
-  void _resetScannerStability() {
-    _lastCaptureAt = null;
-    _lastExtractKey = null;
-    _stableExtractHits = 0;
   }
 
   void _confirmEntry() {
@@ -1081,14 +958,12 @@ class _EntryForm extends StatelessWidget {
 
 class _ScannedProduct {
   const _ScannedProduct({
-    required this.code,
     required this.name,
     required this.category,
     required this.unitPrice,
     required this.lastScanLabel,
   });
 
-  final String code;
   final String name;
   final String category;
   final int unitPrice;

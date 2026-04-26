@@ -7,6 +7,7 @@ import 'package:SaktoSpend/features/budgets/domain/entities/budget.dart';
 import 'package:SaktoSpend/features/shopping_session/domain/entities/session_cart_item.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 part 'scan_review_screen_logic.dart';
@@ -45,6 +46,7 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
   final TextRecognizer _textRecognizer = TextRecognizer(
     script: TextRecognitionScript.latin,
   );
+  final ImagePicker _imagePicker = ImagePicker();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -208,20 +210,44 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
             )
           else if (!_manualOnlyMode)
             Positioned(
+              left: 14,
               right: 14,
               bottom: 22,
-              child: FilledButton.icon(
-                onPressed: _openManualEntry,
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _scanLabelPhoto,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white),
+                        backgroundColor: Colors.black.withValues(alpha: 0.25),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                      ),
+                      icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                      label: const Text('Photo Scan'),
+                    ),
                   ),
-                ),
-                icon: const Icon(Icons.edit_note, size: 18),
-                label: const Text('Manual Entry'),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _openManualEntry,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                      ),
+                      icon: const Icon(Icons.edit_note, size: 18),
+                      label: const Text('Manual Entry'),
+                    ),
+                  ),
+                ],
               ),
             ),
           if (!_manualOnlyMode && hasScan)
@@ -381,77 +407,176 @@ class _ScanReviewScreenState extends State<ScanReviewScreen> {
       await _cameraController.stop();
       if (!mounted) return;
 
-      setState(() {
-        _isCameraStopped = true;
-        _isProcessingCapture = false;
-        _scannedProduct = _ScannedProduct(
-          code: _extractBarcodeCode(capture),
-          name: extracted.name,
-          category: _category,
-          unitPrice: extracted.price,
-          lastScanLabel: 'just now',
-        );
-        _nameController.text = extracted.name;
-        _priceController.text = MoneyUtils.centavosToInputValue(
-          extracted.price,
-        );
-      });
+      _applyExtractedProduct(extracted, code: _extractBarcodeCode(capture));
     } catch (_) {
       if (!mounted) return;
       setState(() => _isProcessingCapture = false);
     }
   }
 
-  Future<_ExtractedProduct?> _extractProductDetails(Uint8List bytes) async {
+  Future<ScannerOcrProduct?> _extractProductDetails(Uint8List bytes) async {
     final tempFile = File(
       '${Directory.systemTemp.path}${Platform.pathSeparator}scan_${DateTime.now().microsecondsSinceEpoch}.png',
     );
 
     await tempFile.writeAsBytes(bytes, flush: true);
     try {
-      final inputImage = InputImage.fromFilePath(tempFile.path);
-      final recognizedText = await _textRecognizer.processImage(inputImage);
-
-      final ocrLines =
-          recognizedText.blocks
-              .expand((block) => block.lines)
-              .map(
-                (line) => _OcrLine(
-                  text: line.text.trim(),
-                  top: line.boundingBox.top,
-                  left: line.boundingBox.left,
-                ),
-              )
-              .where((line) => line.text.isNotEmpty)
-              .toList()
-            ..sort((a, b) {
-              final topCompare = a.top.compareTo(b.top);
-              if (topCompare != 0) {
-                return topCompare;
-              }
-              return a.left.compareTo(b.left);
-            });
-
-      final lines = ocrLines.map((line) => line.text).toList();
-      final price = _extractPrice(lines.join(' '));
-      final name = _extractName(lines);
-
-      if (name == null || price == null) {
-        return null;
-      }
-      if (!_isReliableExtractedName(name) || !_isReliableExtractedPrice(price)) {
-        return null;
-      }
-
-      return _ExtractedProduct(
-        name: name,
-        price: price,
-      );
+      return _extractProductDetailsFromPath(tempFile.path);
     } finally {
       if (await tempFile.exists()) {
         await tempFile.delete();
       }
     }
+  }
+
+  Future<ScannerOcrProduct?> _extractProductDetailsFromPath(String path) async {
+    final inputImage = InputImage.fromFilePath(path);
+    final recognizedText = await _textRecognizer.processImage(inputImage);
+
+    final ocrLines =
+        recognizedText.blocks
+            .expand((block) => block.lines)
+            .map(
+              (line) => ScannerOcrLine(
+                text: line.text.trim(),
+                top: line.boundingBox.top,
+                left: line.boundingBox.left,
+                width: line.boundingBox.width,
+                height: line.boundingBox.height,
+              ),
+            )
+            .where((line) => line.text.isNotEmpty)
+            .toList()
+          ..sort((a, b) {
+            final topCompare = a.top.compareTo(b.top);
+            if (topCompare != 0) {
+              return topCompare;
+            }
+            return a.left.compareTo(b.left);
+          });
+
+    return extractScannerOcrProduct(ocrLines);
+  }
+
+  Future<void> _scanLabelPhoto() async {
+    if (_showEntry || _isProcessingCapture || _isCameraStopped) {
+      return;
+    }
+
+    _resetScannerStability();
+    _isCameraStopped = true;
+    await _cameraController.stop();
+
+    final source = await _pickImageSource();
+    if (!mounted) {
+      return;
+    }
+    if (source == null) {
+      await _resumeCameraScanning();
+      return;
+    }
+
+    setState(() => _isProcessingCapture = true);
+
+    try {
+      final picked = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 100,
+      );
+      if (!mounted) {
+        return;
+      }
+      if (picked == null) {
+        await _resumeCameraScanning();
+        return;
+      }
+
+      final extracted = await _extractProductDetailsFromPath(picked.path);
+      if (!mounted) {
+        return;
+      }
+      if (extracted == null) {
+        AppSnackbars.showError(
+          context,
+          'No product name and price were detected from that photo.',
+        );
+        await _resumeCameraScanning();
+        return;
+      }
+
+      _applyExtractedProduct(extracted);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      AppSnackbars.showError(context, 'Failed to scan product photo.');
+      await _resumeCameraScanning();
+    }
+  }
+
+  Future<ImageSource?> _pickImageSource() {
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: const Color(0xFFF8F7F4),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_camera_outlined),
+                  title: const Text('Take Photo'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.camera),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: const Text('Choose Photo'),
+                  onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _resumeCameraScanning() async {
+    if (!mounted || _manualOnlyMode || _showEntry) {
+      return;
+    }
+
+    setState(() {
+      _isProcessingCapture = false;
+      _isCameraStopped = false;
+    });
+
+    await _cameraController.start();
+  }
+
+  void _applyExtractedProduct(ScannerOcrProduct extracted, {String code = ''}) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isCameraStopped = true;
+      _isProcessingCapture = false;
+      _scannedProduct = _ScannedProduct(
+        code: code,
+        name: extracted.name,
+        category: _category,
+        unitPrice: extracted.price,
+        lastScanLabel: 'just now',
+      );
+      _nameController.text = extracted.name;
+      _priceController.text = MoneyUtils.centavosToInputValue(extracted.price);
+    });
   }
 
   void _openManualEntry() {

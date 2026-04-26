@@ -56,6 +56,181 @@ const _supportedCurrencies = <_CurrencyOption>[
   _currencyPhp,
 ];
 
+class _SettingsOverviewCard extends StatelessWidget {
+  const _SettingsOverviewCard({
+    required this.profileName,
+    required this.currencyLabel,
+    required this.hardBudgetModeEnabled,
+    required this.ocrScannerEnabled,
+  });
+
+  final String profileName;
+  final String currencyLabel;
+  final bool hardBudgetModeEnabled;
+  final bool ocrScannerEnabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
+      decoration: BoxDecoration(
+        color: tokens.surfacePrimary,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: tokens.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: tokens.shadowColor,
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+        gradient: RadialGradient(
+          center: const Alignment(0.88, -0.06),
+          radius: 1.08,
+          colors: [
+            tokens.accentSoft.withValues(alpha: 0.92),
+            Colors.white.withValues(alpha: 0.97),
+            Colors.white,
+          ],
+          stops: const [0.0, 0.42, 1.0],
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SETTINGS HUB',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    letterSpacing: 1.8,
+                    color: tokens.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  profileName,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontSize: 30,
+                    color: tokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Everything below controls budget discipline, alerts, and label-scanning behavior across the app.',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: tokens.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _SettingsStatusChip(
+                      icon: Icons.payments_outlined,
+                      label: currencyLabel,
+                      backgroundColor: tokens.surfaceSecondary,
+                      foregroundColor: tokens.textSecondary,
+                    ),
+                    _SettingsStatusChip(
+                      icon: hardBudgetModeEnabled
+                          ? Icons.shield_rounded
+                          : Icons.shield_outlined,
+                      label: hardBudgetModeEnabled
+                          ? 'Hard Mode On'
+                          : 'Hard Mode Off',
+                      backgroundColor: hardBudgetModeEnabled
+                          ? tokens.accentSoft
+                          : tokens.surfaceSecondary,
+                      foregroundColor: hardBudgetModeEnabled
+                          ? const Color(0xFF5F950D)
+                          : tokens.textSecondary,
+                    ),
+                    _SettingsStatusChip(
+                      icon: Icons.document_scanner_outlined,
+                      label: ocrScannerEnabled ? 'Scanner Ready' : 'Scanner Off',
+                      backgroundColor: ocrScannerEnabled
+                          ? tokens.accentSoft
+                          : tokens.surfaceSecondary,
+                      foregroundColor: ocrScannerEnabled
+                          ? const Color(0xFF5F950D)
+                          : tokens.textSecondary,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 18),
+          Container(
+            width: 62,
+            height: 62,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.94),
+              shape: BoxShape.circle,
+              border: Border.all(color: tokens.borderSubtle),
+            ),
+            child: Icon(
+              Icons.tune_rounded,
+              color: tokens.accentStrong,
+              size: 30,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsStatusChip extends StatelessWidget {
+  const _SettingsStatusChip({
+    required this.icon,
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: foregroundColor),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SectionLabel extends StatelessWidget {
   const _SectionLabel(this.text);
 
@@ -63,12 +238,13 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = context.appThemeTokens;
     return Text(
       text,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        letterSpacing: 2,
+        letterSpacing: 1.8,
         fontWeight: FontWeight.w800,
-        color: const Color(0xFF5B574F),
+        color: tokens.textSecondary,
       ),
     );
   }
@@ -76,12 +252,14 @@ class _SectionLabel extends StatelessWidget {
 
 class _InfoChevronRow extends StatelessWidget {
   const _InfoChevronRow({
+    required this.icon,
     required this.title,
     required this.subtitle,
     required this.value,
     this.onTap,
   });
 
+  final IconData icon;
   final String title;
   final String subtitle;
   final String value;
@@ -89,38 +267,59 @@ class _InfoChevronRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF5F5A52),
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SettingsLeadingIcon(icon: icon),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: tokens.textPrimary,
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: tokens.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    value,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: tokens.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: tokens.textTertiary,
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF5A554D),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 6),
-            const Icon(Icons.chevron_right, color: Color(0xFF8A857C)),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -129,6 +328,7 @@ class _InfoChevronRow extends StatelessWidget {
 
 class _SwitchRow extends StatelessWidget {
   const _SwitchRow({
+    required this.icon,
     required this.title,
     required this.subtitle,
     required this.value,
@@ -136,6 +336,7 @@ class _SwitchRow extends StatelessWidget {
     this.compact = false,
   });
 
+  final IconData icon;
   final String title;
   final String subtitle;
   final bool value;
@@ -144,34 +345,39 @@ class _SwitchRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, compact ? 0 : 14, 16, compact ? 0 : 14),
+      padding: EdgeInsets.fromLTRB(16, compact ? 0 : 16, 16, compact ? 0 : 16),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _SettingsLeadingIcon(icon: icon),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: tokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF5F5A52),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: tokens.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 10),
-          Switch(
+          Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeTrackColor: const Color(0xFF111111),
-            activeThumbColor: Colors.white,
-            inactiveTrackColor: const Color(0xFFD6D3CC),
-            inactiveThumbColor: const Color(0xFF726D63),
-            trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
           ),
         ],
       ),
@@ -180,28 +386,60 @@ class _SwitchRow extends StatelessWidget {
 }
 
 class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.title, required this.icon, this.onTap});
+  const _ActionRow({
+    required this.title,
+    required this.icon,
+    required this.subtitle,
+    this.onTap,
+  });
 
   final String title;
   final IconData icon;
+  final String subtitle;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SettingsLeadingIcon(icon: icon),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: tokens.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: tokens.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Icon(icon, size: 18, color: const Color(0xFF8E897F)),
-          ],
+              const SizedBox(width: 12),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: tokens.textTertiary,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -209,33 +447,56 @@ class _ActionRow extends StatelessWidget {
 }
 
 class _VersionRow extends StatelessWidget {
-  const _VersionRow({required this.version});
+  const _VersionRow({
+    required this.version,
+    required this.icon,
+  });
 
   final String version;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Row(
         children: [
+          _SettingsLeadingIcon(icon: icon),
+          const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              'Version',
-              style: Theme.of(context).textTheme.titleMedium,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Version',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: tokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Current installed release of the app.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: tokens.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
+          const SizedBox(width: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1EFEA),
-              borderRadius: BorderRadius.circular(4),
+              color: tokens.surfaceSecondary,
+              borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
               version,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF7D776D),
+                color: tokens.textSecondary,
               ),
             ),
           ),
@@ -247,12 +508,14 @@ class _VersionRow extends StatelessWidget {
 
 class _ComingSoonFeatureRow extends StatelessWidget {
   const _ComingSoonFeatureRow({
+    required this.icon,
     required this.title,
     required this.badge,
     required this.subtitle,
     required this.trailingLabel,
   });
 
+  final IconData icon;
   final String title;
   final String badge;
   final String subtitle;
@@ -261,11 +524,14 @@ class _ComingSoonFeatureRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _SettingsLeadingIcon(icon: icon),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,15 +544,15 @@ class _ComingSoonFeatureRow extends StatelessWidget {
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF2F2F2F),
+                          color: tokens.textPrimary,
                         ),
                       ),
                       TextSpan(
                         text: '  $badge',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          letterSpacing: 1.4,
+                          letterSpacing: 1.2,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF9A958C),
+                          color: tokens.textTertiary,
                         ),
                       ),
                     ],
@@ -296,7 +562,7 @@ class _ComingSoonFeatureRow extends StatelessWidget {
                 Text(
                   subtitle,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: const Color(0xFF4E4A43),
+                    color: tokens.textSecondary,
                   ),
                 ),
               ],
@@ -308,13 +574,37 @@ class _ComingSoonFeatureRow extends StatelessWidget {
             child: Text(
               trailingLabel,
               style: theme.textTheme.bodyMedium?.copyWith(
-                letterSpacing: 3.2,
+                letterSpacing: 2.4,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFFB2AEA6),
+                color: tokens.textTertiary,
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SettingsLeadingIcon extends StatelessWidget {
+  const _SettingsLeadingIcon({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.appThemeTokens;
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: tokens.surfaceSecondary,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(
+        icon,
+        size: 22,
+        color: tokens.textSecondary,
       ),
     );
   }

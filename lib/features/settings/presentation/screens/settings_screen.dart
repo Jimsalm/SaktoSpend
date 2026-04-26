@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:SaktoSpend/app/providers/providers.dart';
+import 'package:SaktoSpend/core/theme/app_theme.dart';
 import 'package:SaktoSpend/core/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     final profileAsync = ref.watch(userProfileProvider);
     final currencyCodeAsync = ref.watch(appCurrencyCodeProvider);
     final hardBudgetModeAsync = ref.watch(appHardBudgetModeProvider);
@@ -67,118 +69,138 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 22),
+        padding: const EdgeInsets.fromLTRB(26, 20, 26, 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Settings',
-                  style: theme.textTheme.headlineMedium?.copyWith(fontSize: 52),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Settings',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontSize: 40,
+                          color: tokens.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Tune your profile, shopping controls, alerts, and data preferences in one place.',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: tokens.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 16),
                 Container(
-                  width: 54,
-                  height: 54,
+                  width: 60,
+                  height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(16),
+                    color: const Color(0xFF20242C),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.08),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: tokens.shadowColor,
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: const Icon(
                     Icons.person,
-                    color: Colors.white,
-                    size: 28,
+                    color: Color(0xFFFFD658),
+                    size: 30,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
+            _SettingsOverviewCard(
+              profileName: displayName.trim().isEmpty ? 'Your profile' : displayName,
+              currencyLabel: activeCurrency.shortLabel,
+              hardBudgetModeEnabled: hardBudgetMode,
+              ocrScannerEnabled: ocrScannerEnabled,
+            ),
+            const SizedBox(height: 16),
             if (profileAsync.hasError)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
+                child: _buildErrorBanner(
                   'Failed to load profile: ${profileAsync.error}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF8B0000),
-                  ),
                 ),
               ),
             if (currencyCodeAsync.hasError)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
+                child: _buildErrorBanner(
                   'Failed to load currency settings: ${currencyCodeAsync.error}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF8B0000),
-                  ),
                 ),
               ),
             if (hardBudgetModeAsync.hasError)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
+                child: _buildErrorBanner(
                   'Failed to load hard budget mode: ${hardBudgetModeAsync.error}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF8B0000),
-                  ),
                 ),
               ),
             if (thresholdAlertsAsync.hasError)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
+                child: _buildErrorBanner(
                   'Failed to load threshold alerts: ${thresholdAlertsAsync.error}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF8B0000),
-                  ),
                 ),
               ),
             if (warningLevelAsync.hasError)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
+                child: _buildErrorBanner(
                   'Failed to load warning level: ${warningLevelAsync.error}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF8B0000),
-                  ),
                 ),
               ),
             if (ocrScannerAsync.hasError)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
+                child: _buildErrorBanner(
                   'Failed to load OCR scanner setting: ${ocrScannerAsync.error}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF8B0000),
-                  ),
                 ),
               ),
             const _SectionLabel('PROFILE DETAILS'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             _buildProfileCard(
               profileName: displayName,
               profileEmail: displayEmail,
               profileImageUrl: displayImageUrl,
               isPersistingProfile: isPersistingProfile,
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 22),
             const _SectionLabel('GENERAL'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             _buildListCard([
               _InfoChevronRow(
+                icon: Icons.payments_outlined,
                 title: 'Currency',
                 subtitle: 'Set your primary currency for tracking',
                 value: activeCurrency.shortLabel,
                 onTap: () => _openCurrencyPicker(activeCurrency.code),
               ),
               _InfoChevronRow(
+                icon: Icons.palette_outlined,
                 title: 'Theme',
                 subtitle: 'Choose how the app looks',
-                value: 'Light',
+                value: 'Light Mode',
                 onTap: _comingSoon,
               ),
               _SwitchRow(
+                icon: Icons.shield_outlined,
                 title: 'Hard Budget Mode',
                 subtitle: 'Prevent entries exceeding remaining funds',
                 value: hardBudgetMode,
@@ -199,15 +221,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 },
               ),
             ]),
-            const SizedBox(height: 18),
+            const SizedBox(height: 22),
             const _SectionLabel('THRESHOLD ALERTS'),
-            const SizedBox(height: 8),
-            Card(
+            const SizedBox(height: 10),
+            _buildSurfaceCard(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _SwitchRow(
+                      icon: Icons.notifications_active_outlined,
                       title: 'Spending Thresholds',
                       subtitle:
                           'Receive an instant push notification when you exceed specific budget percentages.',
@@ -229,98 +253,121 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       },
                       compact: true,
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'Primary Warning Level',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF3A362F),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            '${primaryWarningLevel.round()}%',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: const Color(0xFF111111),
-                        inactiveTrackColor: const Color(0xFFD9D5CC),
-                        thumbColor: Colors.black,
-                        trackHeight: 3.2,
-                        overlayColor: Colors.black12,
+                    const SizedBox(height: 14),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                      decoration: BoxDecoration(
+                        color: tokens.surfaceSecondary,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: tokens.borderSubtle),
                       ),
-                      child: Slider(
-                        min: 50,
-                        max: 95,
-                        divisions: 45,
-                        value: primaryWarningLevel,
-                        onChanged: spendingThresholdAlerts
-                            ? (value) {
-                                ref
-                                    .read(
-                                      appPrimaryWarningLevelProvider.notifier,
-                                    )
-                                    .setLocal(value);
-                              }
-                            : null,
-                        onChangeEnd: spendingThresholdAlerts
-                            ? (value) async {
-                                try {
-                                  await ref
-                                      .read(
-                                        appPrimaryWarningLevelProvider.notifier,
-                                      )
-                                      .saveLevel(value);
-                                } catch (_) {
-                                  if (!context.mounted) {
-                                    return;
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Primary Warning Level',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: tokens.textPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: tokens.textPrimary,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  '${primaryWarningLevel.round()}%',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Choose when the first warning should appear during a shopping session.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: tokens.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Slider(
+                            min: 50,
+                            max: 95,
+                            divisions: 45,
+                            value: primaryWarningLevel,
+                            onChanged: spendingThresholdAlerts
+                                ? (value) {
+                                    ref
+                                        .read(
+                                          appPrimaryWarningLevelProvider.notifier,
+                                        )
+                                        .setLocal(value);
                                   }
-                                  AppSnackbars.showError(
-                                    context,
-                                    'Failed to save warning level.',
-                                  );
-                                }
-                              }
-                            : null,
+                                : null,
+                            onChangeEnd: spendingThresholdAlerts
+                                ? (value) async {
+                                    try {
+                                      await ref
+                                          .read(
+                                            appPrimaryWarningLevelProvider
+                                                .notifier,
+                                          )
+                                          .saveLevel(value);
+                                    } catch (_) {
+                                      if (!context.mounted) {
+                                        return;
+                                      }
+                                      AppSnackbars.showError(
+                                        context,
+                                        'Failed to save warning level.',
+                                      );
+                                    }
+                                  }
+                                : null,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '50%',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: tokens.textSecondary,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                '95%',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: tokens.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
-                    const Row(
-                      children: [
-                        Text('50%', style: TextStyle(fontSize: 12)),
-                        Spacer(),
-                        Text('95%', style: TextStyle(fontSize: 12)),
-                      ],
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 22),
             const _SectionLabel('FEATURES'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             _buildListCard([
               const _ComingSoonFeatureRow(
+                icon: Icons.psychology_alt_outlined,
                 title: 'Offline AI',
                 badge: '(COMING SOON)',
                 subtitle:
@@ -328,9 +375,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 trailingLabel: 'SOON',
               ),
               _SwitchRow(
+                icon: Icons.document_scanner_outlined,
                 title: 'OCR Scanner',
                 subtitle:
-                    'Automatically extract items and prices from physical receipts using your camera.',
+                    'Automatically extract item names and prices from product labels using your camera.',
                 value: ocrScannerEnabled,
                 onChanged: (value) async {
                   try {
@@ -349,34 +397,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 },
               ),
             ]),
-            const SizedBox(height: 18),
+            const SizedBox(height: 22),
             const _SectionLabel('DATA'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             _buildListCard([
               _ActionRow(
                 title: 'Export as CSV',
                 icon: Icons.download_for_offline_outlined,
+                subtitle: 'Download a spreadsheet-ready copy of your budgets and sessions.',
                 onTap: _comingSoon,
               ),
               _ActionRow(
                 title: 'Export as JSON',
                 icon: Icons.code_outlined,
+                subtitle: 'Create a structured data backup for advanced restores or migrations.',
                 onTap: _comingSoon,
               ),
               _ActionRow(
                 title: 'Backup data',
                 icon: Icons.backup_outlined,
+                subtitle: 'Save a complete local backup before changing devices.',
                 onTap: _comingSoon,
               ),
             ]),
-            const SizedBox(height: 18),
+            const SizedBox(height: 22),
             const _SectionLabel('ABOUT'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             _buildListCard([
-              const _VersionRow(version: '1.0.0'),
+              const _VersionRow(
+                version: '1.0.0',
+                icon: Icons.verified_outlined,
+              ),
               _ActionRow(
                 title: 'Privacy Policy',
                 icon: Icons.open_in_new,
+                subtitle: 'Review how your data is handled and stored in the app.',
                 onTap: _comingSoon,
               ),
             ]),
@@ -392,52 +447,80 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String profileImageUrl,
     required bool isPersistingProfile,
   }) {
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
     final imageUrl = _isEditingProfile
         ? _imageController.text.trim()
         : profileImageUrl.trim();
     final imageProvider = _buildProfileImage(imageUrl);
 
-    return Card(
+    return _buildSurfaceCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!_isEditingProfile)
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: const Color(0xFFE6E2D9),
-                    backgroundImage: imageProvider,
-                    child: imageProvider == null
-                        ? const Icon(Icons.person, color: Color(0xFF5D574D))
-                        : null,
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: tokens.surfaceSecondary,
+                      border: Border.all(color: tokens.borderSubtle),
+                    ),
+                    child: CircleAvatar(
+                      radius: 34,
+                      backgroundColor: Colors.transparent,
+                      backgroundImage: imageProvider,
+                      child: imageProvider == null
+                          ? Icon(
+                              Icons.person,
+                              color: tokens.textSecondary,
+                              size: 32,
+                            )
+                          : null,
+                    ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
+                          'PROFILE',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: tokens.textSecondary,
+                            letterSpacing: 1.6,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
                           profileName.trim().isEmpty
                               ? 'No profile name'
                               : profileName,
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: tokens.textPrimary,
+                          ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4),
                         Text(
                           profileEmail.trim().isEmpty
                               ? 'No email'
                               : profileEmail,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: const Color(0xFF5F5A52)),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: tokens.textSecondary,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
-                  TextButton.icon(
+                  FilledButton.icon(
                     onPressed: isPersistingProfile
                         ? null
                         : () {
@@ -447,58 +530,120 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               imageUrl: profileImageUrl,
                             );
                           },
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF2F2F2F),
-                      backgroundColor: const Color(0xFFF1EFEA),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: tokens.accentStrong,
+                      foregroundColor: tokens.textPrimary,
+                      disabledBackgroundColor: tokens.surfaceElevated,
+                      disabledForegroundColor: tokens.textTertiary,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: const BorderSide(color: Color(0xFFE6E3DD)),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 8,
+                        horizontal: 14,
+                        vertical: 12,
                       ),
+                      elevation: 0,
                     ),
                     icon: const Icon(Icons.edit_outlined, size: 18),
                     label: const Text('Edit'),
                   ),
                 ],
               ),
+            if (!_isEditingProfile) ...[
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                decoration: BoxDecoration(
+                  color: tokens.surfaceSecondary,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: tokens.borderSubtle),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: tokens.surfacePrimary,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.badge_outlined,
+                        color: tokens.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Keep your profile current',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: tokens.textPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Update your display name, email, and avatar so the rest of the app feels personal and tidy.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: tokens.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (_isEditingProfile) ...[
               Center(
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    CircleAvatar(
-                      radius: 38,
-                      backgroundColor: const Color(0xFFE6E2D9),
-                      backgroundImage: imageProvider,
-                      child: imageProvider == null
-                          ? const Icon(
-                              Icons.person,
-                              color: Color(0xFF5D574D),
-                              size: 30,
-                            )
-                          : null,
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: tokens.surfaceSecondary,
+                        border: Border.all(color: tokens.borderSubtle),
+                      ),
+                      child: CircleAvatar(
+                        radius: 38,
+                        backgroundColor: Colors.transparent,
+                        backgroundImage: imageProvider,
+                        child: imageProvider == null
+                            ? Icon(
+                                Icons.person,
+                                color: tokens.textSecondary,
+                                size: 34,
+                              )
+                            : null,
+                      ),
                     ),
                     Positioned(
                       right: -2,
                       bottom: -2,
                       child: Material(
-                        color: Colors.white,
+                        color: tokens.accentStrong,
                         shape: const CircleBorder(),
-                        elevation: 1.2,
+                        elevation: 0,
                         child: InkWell(
                           customBorder: const CircleBorder(),
                           onTap: isPersistingProfile
                               ? null
                               : _pickProfileImageFromGallery,
-                          child: const Padding(
-                            padding: EdgeInsets.all(7),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
                             child: Icon(
                               Icons.edit_outlined,
                               size: 16,
-                              color: Color(0xFF2F2F2F),
+                              color: tokens.textPrimary,
                             ),
                           ),
                         ),
@@ -510,8 +655,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 18),
               Text(
                 'Full Name',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF5F5A52),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: tokens.textSecondary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -523,8 +668,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 12),
               Text(
                 'Email Address',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF5F5A52),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: tokens.textSecondary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -540,16 +685,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
+                    child: OutlinedButton(
                       onPressed: _cancelProfileEditing,
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF2F2F2F),
-                        backgroundColor: const Color(0xFFF1EFEA),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: tokens.textPrimary,
+                        backgroundColor: tokens.surfacePrimary,
+                        side: BorderSide(color: tokens.borderSubtle),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: const BorderSide(color: Color(0xFFE6E3DD)),
+                          borderRadius: BorderRadius.circular(18),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        minimumSize: const Size.fromHeight(54),
                       ),
                       child: const Text('Cancel'),
                     ),
@@ -563,12 +708,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               await _saveProfileEdits();
                             },
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF111111),
-                        foregroundColor: Colors.white,
+                        backgroundColor: tokens.accentStrong,
+                        foregroundColor: tokens.textPrimary,
+                        disabledBackgroundColor: tokens.surfaceElevated,
+                        disabledForegroundColor: tokens.textTertiary,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(18),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        minimumSize: const Size.fromHeight(54),
+                        elevation: 0,
                       ),
                       child: const Text('Save'),
                     ),
@@ -590,7 +738,63 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
       children.add(rows[index]);
     }
-    return Card(child: Column(children: children));
+    return _buildSurfaceCard(child: Column(children: children));
+  }
+
+  Widget _buildSurfaceCard({required Widget child}) {
+    final tokens = context.appThemeTokens;
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: tokens.surfacePrimary,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: tokens.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: tokens.shadowColor,
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildErrorBanner(String message) {
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: tokens.warningSoft,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: tokens.warningStrong.withValues(alpha: 0.14),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.error_outline_rounded,
+            size: 18,
+            color: tokens.warningStrong,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: tokens.warningStrong,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   ImageProvider<Object>? _buildProfileImage(String rawPath) {
@@ -622,46 +826,127 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _openCurrencyPicker(String selectedCode) async {
     final selected = await showModalBottomSheet<_CurrencyOption>(
       context: context,
-      backgroundColor: const Color(0xFFF7F6F3),
+      backgroundColor: context.appThemeTokens.backgroundCanvas,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       builder: (context) {
         final theme = Theme.of(context);
+        final tokens = context.appThemeTokens;
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Center(
+                  child: Container(
+                    width: 46,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: tokens.borderSubtle,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
                 Text(
                   'Select Currency',
-                  style: theme.textTheme.titleLarge?.copyWith(fontSize: 26),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontSize: 32,
+                    color: tokens.textPrimary,
+                  ),
                 ),
-                const SizedBox(height: 10),
-                Card(
+                const SizedBox(height: 6),
+                Text(
+                  'Choose the main currency used for budgets, history, and shopping sessions.',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: tokens.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildSurfaceCard(
                   child: Column(
                     children: _supportedCurrencies
                         .map(
-                          (currency) => ListTile(
+                          (currency) => InkWell(
                             onTap: () {
                               Navigator.of(context).pop(currency);
                             },
-                            title: Text(
-                              currency.label,
-                              style: theme.textTheme.titleMedium,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                14,
+                                16,
+                                14,
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 46,
+                                    height: 46,
+                                    decoration: BoxDecoration(
+                                      color: selectedCode == currency.code
+                                          ? tokens.accentSoft
+                                          : tokens.surfaceSecondary,
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Icon(
+                                      Icons.currency_exchange_rounded,
+                                      color: selectedCode == currency.code
+                                          ? const Color(0xFF5F950D)
+                                          : tokens.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          currency.label,
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                color: tokens.textPrimary,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          currency.shortLabel,
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color: tokens.textSecondary,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  if (selectedCode == currency.code)
+                                    Container(
+                                      width: 30,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: tokens.accentStrong,
+                                      ),
+                                      child: Icon(
+                                        Icons.check_rounded,
+                                        color: tokens.textPrimary,
+                                        size: 18,
+                                      ),
+                                    )
+                                  else
+                                    Icon(
+                                      Icons.chevron_right_rounded,
+                                      color: tokens.textTertiary,
+                                    ),
+                                ],
+                              ),
                             ),
-                            subtitle: Text(
-                              currency.shortLabel,
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                            trailing: selectedCode == currency.code
-                                ? const Icon(
-                                    Icons.check,
-                                    color: Color(0xFF111111),
-                                  )
-                                : const SizedBox.shrink(),
                           ),
                         )
                         .toList(),

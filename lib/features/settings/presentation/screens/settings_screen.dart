@@ -50,6 +50,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final tokens = context.appThemeTokens;
     final profileAsync = ref.watch(userProfileProvider);
     final currencyCodeAsync = ref.watch(appCurrencyCodeProvider);
+    final themeModeAsync = ref.watch(appThemeModeProvider);
     final hardBudgetModeAsync = ref.watch(appHardBudgetModeProvider);
     final thresholdAlertsAsync = ref.watch(appSpendingThresholdAlertsProvider);
     final warningLevelAsync = ref.watch(appPrimaryWarningLevelProvider);
@@ -62,6 +63,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final activeCurrency = _currencyByCode(
       currencyCodeAsync.valueOrNull ?? _currencyPhp.code,
     );
+    final activeTheme = _themeByCode(themeModeAsync.valueOrNull ?? _themeLight.code);
     final hardBudgetMode = hardBudgetModeAsync.valueOrNull ?? true;
     final spendingThresholdAlerts = thresholdAlertsAsync.valueOrNull ?? true;
     final primaryWarningLevel = warningLevelAsync.valueOrNull ?? 80.0;
@@ -102,11 +104,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF20242C),
+                    color: tokens.avatarSurface,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.black.withValues(alpha: 0.08),
-                    ),
+                    border: Border.all(color: tokens.borderSubtle),
                     boxShadow: [
                       BoxShadow(
                         color: tokens.shadowColor,
@@ -115,9 +115,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.person,
-                    color: Color(0xFFFFD658),
+                    color: tokens.avatarIconColor,
                     size: 30,
                   ),
                 ),
@@ -143,6 +143,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 padding: const EdgeInsets.only(bottom: 10),
                 child: _buildErrorBanner(
                   'Failed to load currency settings: ${currencyCodeAsync.error}',
+                ),
+              ),
+            if (themeModeAsync.hasError)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _buildErrorBanner(
+                  'Failed to load theme setting: ${themeModeAsync.error}',
                 ),
               ),
             if (hardBudgetModeAsync.hasError)
@@ -196,8 +203,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 icon: Icons.palette_outlined,
                 title: 'Theme',
                 subtitle: 'Choose how the app looks',
-                value: 'Light Mode',
-                onTap: _comingSoon,
+                value: activeTheme.shortLabel,
+                onTap: () => _openThemePicker(activeTheme.code),
               ),
               _SwitchRow(
                 icon: Icons.shield_outlined,
@@ -282,13 +289,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: tokens.textPrimary,
+                                  color: tokens.hardModeBadgeBackground,
                                   borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(color: tokens.borderSubtle),
                                 ),
                                 child: Text(
                                   '${primaryWarningLevel.round()}%',
                                   style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
+                                    color: tokens.hardModeBadgeText,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -532,7 +540,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           },
                     style: FilledButton.styleFrom(
                       backgroundColor: tokens.accentStrong,
-                      foregroundColor: tokens.textPrimary,
+                      foregroundColor: tokens.onAccentStrong,
                       disabledBackgroundColor: tokens.surfaceElevated,
                       disabledForegroundColor: tokens.textTertiary,
                       shape: RoundedRectangleBorder(
@@ -643,7 +651,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             child: Icon(
                               Icons.edit_outlined,
                               size: 16,
-                              color: tokens.textPrimary,
+                              color: tokens.onAccentStrong,
                             ),
                           ),
                         ),
@@ -709,7 +717,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             },
                       style: FilledButton.styleFrom(
                         backgroundColor: tokens.accentStrong,
-                        foregroundColor: tokens.textPrimary,
+                        foregroundColor: tokens.onAccentStrong,
                         disabledBackgroundColor: tokens.surfaceElevated,
                         disabledForegroundColor: tokens.textTertiary,
                         shape: RoundedRectangleBorder(
@@ -896,7 +904,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     child: Icon(
                                       Icons.currency_exchange_rounded,
                                       color: selectedCode == currency.code
-                                          ? const Color(0xFF5F950D)
+                                          ? tokens.accentInk
                                           : tokens.textSecondary,
                                     ),
                                   ),
@@ -935,7 +943,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       ),
                                       child: Icon(
                                         Icons.check_rounded,
-                                        color: tokens.textPrimary,
+                                        color: tokens.onAccentStrong,
                                         size: 18,
                                       ),
                                     )
@@ -971,6 +979,155 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return;
       }
       AppSnackbars.showError(context, 'Failed to save currency.');
+    }
+  }
+
+  Future<void> _openThemePicker(String selectedCode) async {
+    final selected = await showModalBottomSheet<_ThemeOption>(
+      context: context,
+      backgroundColor: context.appThemeTokens.backgroundCanvas,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      builder: (context) {
+        final theme = Theme.of(context);
+        final tokens = context.appThemeTokens;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 46,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: tokens.borderSubtle,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Choose Theme',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontSize: 32,
+                    color: tokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Switch between the light layout and the darker neon-lime look.',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: tokens.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildSurfaceCard(
+                  child: Column(
+                    children: _supportedThemes
+                        .map(
+                          (option) => InkWell(
+                            onTap: () {
+                              Navigator.of(context).pop(option);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                14,
+                                16,
+                                14,
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 46,
+                                    height: 46,
+                                    decoration: BoxDecoration(
+                                      color: selectedCode == option.code
+                                          ? tokens.accentSoft
+                                          : tokens.surfaceSecondary,
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Icon(
+                                      option.icon,
+                                      color: selectedCode == option.code
+                                          ? tokens.accentInk
+                                          : tokens.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          option.label,
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                color: tokens.textPrimary,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          option.description,
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color: tokens.textSecondary,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  if (selectedCode == option.code)
+                                    Container(
+                                      width: 30,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: tokens.accentStrong,
+                                      ),
+                                      child: Icon(
+                                        Icons.check_rounded,
+                                        color: tokens.onAccentStrong,
+                                        size: 18,
+                                      ),
+                                    )
+                                  else
+                                    Icon(
+                                      Icons.chevron_right_rounded,
+                                      color: tokens.textTertiary,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || selected == null) {
+      return;
+    }
+    try {
+      await ref.read(appThemeModeProvider.notifier).saveThemeMode(selected.code);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      AppSnackbars.showError(context, 'Failed to save theme mode.');
     }
   }
 

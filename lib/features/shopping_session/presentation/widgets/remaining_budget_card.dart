@@ -24,7 +24,7 @@ class RemainingBudgetCard extends StatelessWidget {
     final clampedProgress = progress.clamp(0.0, 1.0).toDouble();
     final accentColor = isNegativeRemaining
         ? tokens.warningStrong
-        : const Color(0xFF69A80D);
+        : tokens.accentInkStrong;
 
     return Container(
       width: double.infinity,
@@ -43,12 +43,9 @@ class RemainingBudgetCard extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(0.86, -0.06),
           radius: 1.08,
-          colors: [
-            (isNegativeRemaining ? tokens.warningSoft : tokens.accentSoft)
-                .withValues(alpha: 0.96),
-            Colors.white.withValues(alpha: 0.97),
-            Colors.white,
-          ],
+          colors: tokens.heroGradientColors(
+            glowColor: isNegativeRemaining ? tokens.warningSoft : tokens.accentSoft,
+          ),
           stops: const [0.0, 0.42, 1.0],
         ),
       ),
@@ -102,7 +99,7 @@ class RemainingBudgetCard extends StatelessWidget {
                 width: 62,
                 height: 62,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.94),
+                  color: tokens.heroIconSurface,
                   shape: BoxShape.circle,
                   border: Border.all(color: tokens.borderSubtle),
                 ),
@@ -143,7 +140,7 @@ class RemainingBudgetCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
                 child: Stack(
                   children: [
-                    Container(height: 14, color: const Color(0xFFD9E0EB)),
+                    Container(height: 14, color: tokens.progressTrack),
                     Container(
                       width: progressWidth,
                       height: 14,
@@ -151,8 +148,8 @@ class RemainingBudgetCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                         gradient: LinearGradient(
                           colors: isNegativeRemaining
-                              ? const [Color(0xFFF46B66), Color(0xFFFFA19C)]
-                              : const [Color(0xFF98EA1B), Color(0xFFC9F96E)],
+                              ? tokens.warningProgressGradientColors()
+                              : tokens.positiveProgressGradientColors(),
                         ),
                       ),
                     ),
@@ -165,8 +162,8 @@ class RemainingBudgetCard extends StatelessWidget {
                           height: 12,
                           decoration: BoxDecoration(
                             color: isNegativeRemaining
-                                ? const Color(0xFFFFC9C6)
-                                : const Color(0xFFDDFB8C),
+                                ? tokens.warningProgressCap
+                                : tokens.progressCap,
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),

@@ -47,10 +47,10 @@ class EmptyBudgetsCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.pie_chart_rounded,
                     size: 46,
-                    color: Color(0xFF69A80D),
+                    color: tokens.accentInkStrong,
                   ),
                 ),
               ],
@@ -76,7 +76,7 @@ class EmptyBudgetsCard extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: const Color(0xFFA4ED23),
+              color: tokens.accentStrong,
               boxShadow: [
                 BoxShadow(
                   blurRadius: 10,
@@ -88,7 +88,7 @@ class EmptyBudgetsCard extends StatelessWidget {
             child: TextButton(
               onPressed: onCreatePressed,
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF0D1530),
+                foregroundColor: tokens.onAccentStrong,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -97,7 +97,7 @@ class EmptyBudgetsCard extends StatelessWidget {
               child: Text(
                 '+  Create First Budget',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xFF0D1530),
+                  color: tokens.onAccentStrong,
                   fontWeight: FontWeight.w700,
                 ),
               ),

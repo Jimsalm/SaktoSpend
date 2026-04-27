@@ -164,7 +164,7 @@ class _ScannerEntrySheetOverlay extends StatelessWidget {
             child: GestureDetector(
               onTap: onDismiss,
               child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.24),
+                color: tokens.scrimColor,
               ),
             ),
           ),
@@ -246,18 +246,23 @@ class _ScannerHeaderBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: tokens.textPrimary,
+        color: tokens.hardModeBadgeBackground,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: tokens.borderSubtle),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.shield_rounded, size: 16, color: Colors.white),
+          Icon(
+            Icons.shield_rounded,
+            size: 16,
+            color: tokens.hardModeBadgeIcon,
+          ),
           const SizedBox(width: 8),
           Text(
             'HARD MODE ON',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: tokens.hardModeBadgeText,
               letterSpacing: 0.8,
               fontWeight: FontWeight.w700,
             ),
@@ -300,7 +305,7 @@ class _ScannerHeroCard extends StatelessWidget {
     final statusColor = isProcessing
         ? const Color(0xFF4A66A6)
         : hasScan
-            ? const Color(0xFF5F950D)
+            ? tokens.accentInk
             : tokens.textSecondary;
     final statusBackground = isProcessing
         ? const Color(0xFFE9F0FF)
@@ -325,11 +330,7 @@ class _ScannerHeroCard extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(0.88, -0.06),
           radius: 1.08,
-          colors: [
-            tokens.accentSoft.withValues(alpha: 0.92),
-            Colors.white.withValues(alpha: 0.97),
-            Colors.white,
-          ],
+          colors: tokens.heroGradientColors(),
           stops: const [0.0, 0.42, 1.0],
         ),
       ),
@@ -403,7 +404,7 @@ class _ScannerHeroCard extends StatelessWidget {
             width: 62,
             height: 62,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.94),
+              color: tokens.heroIconSurface,
               shape: BoxShape.circle,
               border: Border.all(color: tokens.borderSubtle),
             ),
@@ -422,7 +423,7 @@ class _ScannerHeroCard extends StatelessWidget {
                           ? Icons.check_circle_outline_rounded
                           : Icons.document_scanner_outlined,
                       color: hasScan
-                          ? const Color(0xFF69A80D)
+                          ? tokens.accentInkStrong
                           : tokens.textPrimary,
                       size: 30,
                     ),
@@ -521,12 +522,12 @@ class _ScannerPrimaryActionButton extends StatelessWidget {
     return _ScannerActionButtonSurface(
       onTap: onPressed,
       backgroundColor: disabled ? tokens.surfaceElevated : tokens.accentStrong,
-      foregroundColor: disabled ? tokens.textTertiary : tokens.textPrimary,
+      foregroundColor: disabled ? tokens.textTertiary : tokens.onAccentStrong,
       borderColor: disabled ? tokens.surfaceElevated : tokens.accentStrong,
       child: _ScannerActionButtonContent(
         icon: icon,
         label: label,
-        foregroundColor: disabled ? tokens.textTertiary : tokens.textPrimary,
+        foregroundColor: disabled ? tokens.textTertiary : tokens.onAccentStrong,
         textStyle: theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w700,
         ),
@@ -651,7 +652,7 @@ class _ScannerActionButtonContent extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.34),
+              color: context.appThemeTokens.actionIconTintSurface,
               borderRadius: BorderRadius.circular(11),
             ),
             child: Icon(icon, size: 18, color: foregroundColor),
@@ -828,7 +829,7 @@ class _ScannedProductCard extends StatelessWidget {
                           ),
                           child: Icon(
                             Icons.arrow_forward_rounded,
-                            color: tokens.textPrimary,
+                            color: tokens.onAccentStrong,
                             size: 18,
                           ),
                         ),

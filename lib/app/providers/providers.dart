@@ -120,6 +120,14 @@ final saveCurrencyCodeUseCaseProvider = Provider<SaveCurrencyCodeUseCase>((
   return SaveCurrencyCodeUseCase(ref.watch(settingsRepositoryProvider));
 });
 
+final getThemeModeUseCaseProvider = Provider<GetThemeModeUseCase>((ref) {
+  return GetThemeModeUseCase(ref.watch(settingsRepositoryProvider));
+});
+
+final saveThemeModeUseCaseProvider = Provider<SaveThemeModeUseCase>((ref) {
+  return SaveThemeModeUseCase(ref.watch(settingsRepositoryProvider));
+});
+
 final getHardBudgetModeUseCaseProvider = Provider<GetHardBudgetModeUseCase>((
   ref,
 ) {
@@ -194,6 +202,11 @@ final userProfileProvider =
 final appCurrencyCodeProvider =
     AsyncNotifierProvider<AppCurrencyCodeNotifier, String>(
       AppCurrencyCodeNotifier.new,
+    );
+
+final appThemeModeProvider =
+    AsyncNotifierProvider<AppThemeModeNotifier, String>(
+      AppThemeModeNotifier.new,
     );
 
 final appHardBudgetModeProvider =
@@ -324,6 +337,39 @@ class AppCurrencyCodeNotifier extends AsyncNotifier<String> {
       MoneyUtils.setCurrencyCode(previous);
       rethrow;
     }
+  }
+}
+
+class AppThemeModeNotifier extends AsyncNotifier<String> {
+  GetThemeModeUseCase get _getThemeModeUseCase =>
+      ref.read(getThemeModeUseCaseProvider);
+  SaveThemeModeUseCase get _saveThemeModeUseCase =>
+      ref.read(saveThemeModeUseCaseProvider);
+
+  @override
+  Future<String> build() async {
+    return _normalize(await _getThemeModeUseCase.call());
+  }
+
+  Future<void> saveThemeMode(String themeMode) async {
+    final normalized = _normalize(themeMode);
+    final previous = state.valueOrNull ?? 'light';
+    state = AsyncValue.data(normalized);
+    try {
+      await _saveThemeModeUseCase.call(normalized);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      state = AsyncValue.data(previous);
+      rethrow;
+    }
+  }
+
+  String _normalize(String themeMode) {
+    final normalized = themeMode.trim().toLowerCase();
+    if (normalized == 'dark') {
+      return 'dark';
+    }
+    return 'light';
   }
 }
 

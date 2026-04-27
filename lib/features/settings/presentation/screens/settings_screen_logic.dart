@@ -56,6 +56,53 @@ const _supportedCurrencies = <_CurrencyOption>[
   _currencyPhp,
 ];
 
+_ThemeOption _themeByCode(String? code) {
+  final normalized = code?.trim().toLowerCase() ?? '';
+  for (final option in _supportedThemes) {
+    if (option.code == normalized) {
+      return option;
+    }
+  }
+  return _themeLight;
+}
+
+class _ThemeOption {
+  const _ThemeOption({
+    required this.code,
+    required this.label,
+    required this.shortLabel,
+    required this.description,
+    required this.icon,
+  });
+
+  final String code;
+  final String label;
+  final String shortLabel;
+  final String description;
+  final IconData icon;
+}
+
+const _themeLight = _ThemeOption(
+  code: 'light',
+  label: 'Light Mode',
+  shortLabel: 'Light',
+  description: 'Bright surfaces with the current soft lime-accent style.',
+  icon: Icons.light_mode_rounded,
+);
+
+const _themeDark = _ThemeOption(
+  code: 'dark',
+  label: 'Dark Mode',
+  shortLabel: 'Dark',
+  description: 'Deep navy surfaces with neon-lime highlights and softer glow.',
+  icon: Icons.dark_mode_rounded,
+);
+
+const _supportedThemes = <_ThemeOption>[
+  _themeLight,
+  _themeDark,
+];
+
 class _SettingsOverviewCard extends StatelessWidget {
   const _SettingsOverviewCard({
     required this.profileName,
@@ -91,11 +138,7 @@ class _SettingsOverviewCard extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(0.88, -0.06),
           radius: 1.08,
-          colors: [
-            tokens.accentSoft.withValues(alpha: 0.92),
-            Colors.white.withValues(alpha: 0.97),
-            Colors.white,
-          ],
+          colors: tokens.heroGradientColors(),
           stops: const [0.0, 0.42, 1.0],
         ),
       ),
@@ -151,7 +194,7 @@ class _SettingsOverviewCard extends StatelessWidget {
                           ? tokens.accentSoft
                           : tokens.surfaceSecondary,
                       foregroundColor: hardBudgetModeEnabled
-                          ? const Color(0xFF5F950D)
+                          ? tokens.accentInk
                           : tokens.textSecondary,
                     ),
                     _SettingsStatusChip(
@@ -161,7 +204,7 @@ class _SettingsOverviewCard extends StatelessWidget {
                           ? tokens.accentSoft
                           : tokens.surfaceSecondary,
                       foregroundColor: ocrScannerEnabled
-                          ? const Color(0xFF5F950D)
+                          ? tokens.accentInk
                           : tokens.textSecondary,
                     ),
                   ],
@@ -174,7 +217,7 @@ class _SettingsOverviewCard extends StatelessWidget {
             width: 62,
             height: 62,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.94),
+              color: tokens.heroIconSurface,
               shape: BoxShape.circle,
               border: Border.all(color: tokens.borderSubtle),
             ),

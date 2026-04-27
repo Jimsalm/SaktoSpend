@@ -10,15 +10,22 @@ class SaktoSpendApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(appCurrencyCodeProvider);
+    final themeModeAsync = ref.watch(appThemeModeProvider);
     ref.watch(appHardBudgetModeProvider);
     ref.watch(appSpendingThresholdAlertsProvider);
     ref.watch(appPrimaryWarningLevelProvider);
     ref.watch(appOcrScannerEnabledProvider);
+    final themeMode = switch (themeModeAsync.valueOrNull ?? 'light') {
+      'dark' => ThemeMode.dark,
+      _ => ThemeMode.light,
+    };
 
     return MaterialApp(
       title: 'Shopping Budget Tracker',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: themeMode,
       home: const AppHomeScreen(),
     );
   }

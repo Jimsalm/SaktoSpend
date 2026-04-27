@@ -68,9 +68,9 @@ class DashboardScreen extends ConsumerWidget {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF20242C),
+                      color: tokens.avatarSurface,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+                      border: Border.all(color: tokens.borderSubtle),
                       boxShadow: [
                         BoxShadow(
                           color: tokens.shadowColor,
@@ -79,9 +79,9 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.person,
-                      color: Color(0xFFFFD658),
+                      color: tokens.avatarIconColor,
                       size: 30,
                     ),
                   ),

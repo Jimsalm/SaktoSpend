@@ -21,7 +21,7 @@ class BudgetOverviewCard extends StatelessWidget {
     final statusColor = switch (statusLabel.toLowerCase()) {
       'exceeded' => tokens.warningStrong,
       'warning' => const Color(0xFFD77A00),
-      'safe' => const Color(0xFF69A80D),
+      'safe' => tokens.accentInkStrong,
       _ => tokens.textSecondary,
     };
 
@@ -42,11 +42,7 @@ class BudgetOverviewCard extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(0.84, -0.06),
           radius: 1.08,
-          colors: [
-            tokens.accentSoft.withValues(alpha: 0.9),
-            Colors.white.withValues(alpha: 0.97),
-            Colors.white,
-          ],
+          colors: tokens.heroGradientColors(),
           stops: const [0.0, 0.42, 1.0],
         ),
       ),
@@ -91,13 +87,13 @@ class BudgetOverviewCard extends StatelessWidget {
                 width: 62,
                 height: 62,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.94),
+                  color: tokens.heroIconSurface,
                   shape: BoxShape.circle,
                   border: Border.all(color: tokens.borderSubtle),
                 ),
                 child: Icon(
                   Icons.account_balance_wallet_rounded,
-                  color: const Color(0xFF69A80D),
+                  color: tokens.accentInkStrong,
                   size: 30,
                 ),
               ),
@@ -117,7 +113,7 @@ class BudgetOverviewCard extends StatelessWidget {
               Text(
                 '${(clampedUtilization * 100).round()}%',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: const Color(0xFF69A80D),
+                  color: tokens.accentInkStrong,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -132,14 +128,14 @@ class BudgetOverviewCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
                 child: Stack(
                   children: [
-                    Container(height: 14, color: const Color(0xFFD9E0EB)),
+                    Container(height: 14, color: tokens.progressTrack),
                     Container(
                       width: progressWidth,
                       height: 14,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF98EA1B), Color(0xFFC9F96E)],
+                        gradient: LinearGradient(
+                          colors: tokens.positiveProgressGradientColors(),
                         ),
                       ),
                     ),
@@ -151,7 +147,7 @@ class BudgetOverviewCard extends StatelessWidget {
                           width: 20,
                           height: 12,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFDDFB8C),
+                            color: tokens.progressCap,
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),

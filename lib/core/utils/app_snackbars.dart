@@ -13,7 +13,7 @@ class AppSnackbars {
       context,
       message,
       icon: Icons.check_circle_outline,
-      iconColor: const Color(0xFF5F950D),
+      iconColor: context.appThemeTokens.accentInk,
       iconBackgroundColor: context.appThemeTokens.accentSoft,
       duration: duration,
     );

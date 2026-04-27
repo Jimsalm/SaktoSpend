@@ -37,11 +37,7 @@ class HistoryOverviewCard extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(0.88, -0.06),
           radius: 1.08,
-          colors: [
-            tokens.accentSoft.withValues(alpha: 0.92),
-            Colors.white.withValues(alpha: 0.97),
-            Colors.white,
-          ],
+          colors: tokens.heroGradientColors(),
           stops: const [0.0, 0.42, 1.0],
         ),
       ),
@@ -102,7 +98,7 @@ class HistoryOverviewCard extends StatelessWidget {
             width: 62,
             height: 62,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.94),
+              color: tokens.heroIconSurface,
               shape: BoxShape.circle,
               border: Border.all(color: tokens.borderSubtle),
             ),

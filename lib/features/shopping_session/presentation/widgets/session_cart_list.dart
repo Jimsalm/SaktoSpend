@@ -114,7 +114,7 @@ class SessionCartList extends StatelessWidget {
                               icon: Icons.shield_rounded,
                               label: 'Essential',
                               backgroundColor: tokens.accentSoft,
-                              foregroundColor: const Color(0xFF5F950D),
+                              foregroundColor: tokens.accentInk,
                             ),
                         ],
                       ),
@@ -266,8 +266,11 @@ IconData _sourceIcon(SessionCartItemSource source) {
     case SessionCartItemSource.manual:
       return (tokens.surfaceSecondary, tokens.textSecondary);
     case SessionCartItemSource.voice:
-      return (const Color(0xFFE9F0FF), const Color(0xFF4A66A6));
+      return (
+        tokens.isDark ? const Color(0xFF1B2740) : const Color(0xFFE9F0FF),
+        tokens.isDark ? const Color(0xFF9FB9FF) : const Color(0xFF4A66A6),
+      );
     case SessionCartItemSource.labelScan:
-      return (tokens.accentSoft, const Color(0xFF5F950D));
+      return (tokens.accentSoft, tokens.accentInk);
   }
 }

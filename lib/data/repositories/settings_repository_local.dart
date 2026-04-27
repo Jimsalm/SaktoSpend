@@ -15,6 +15,7 @@ class SettingsRepositoryLocal implements SettingsRepository {
   static const _defaultName = 'User';
   static const _defaultEmail = 'user@example.com';
   static const _currencyCodeKey = 'currency_code';
+  static const _themeModeKey = 'theme_mode';
   static const _hardBudgetModeKey = 'hard_budget_mode';
   static const _spendingThresholdAlertsKey = 'spending_threshold_alerts';
   static const _primaryWarningLevelKey = 'primary_warning_level';
@@ -125,6 +126,37 @@ class SettingsRepositoryLocal implements SettingsRepository {
     await db.insert(AppDatabase.appSettingsTable, {
       'key': _currencyCodeKey,
       'value': MoneyUtils.normalizeCurrencyCode(currencyCode),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  @override
+  Future<String> getThemeMode() async {
+    final db = await _database.instance;
+    final rows = await db.query(
+      AppDatabase.appSettingsTable,
+      columns: const ['value'],
+      where: 'key = ?',
+      whereArgs: [_themeModeKey],
+      limit: 1,
+    );
+
+    if (rows.isEmpty) {
+      await db.insert(AppDatabase.appSettingsTable, {
+        'key': _themeModeKey,
+        'value': 'light',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      return 'light';
+    }
+
+    return _normalizeThemeMode((rows.first['value'] as String?) ?? '');
+  }
+
+  @override
+  Future<void> saveThemeMode(String themeMode) async {
+    final db = await _database.instance;
+    await db.insert(AppDatabase.appSettingsTable, {
+      'key': _themeModeKey,
+      'value': _normalizeThemeMode(themeMode),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
@@ -260,5 +292,13 @@ class SettingsRepositoryLocal implements SettingsRepository {
 
   double _normalizeWarningLevel(double level) {
     return level.clamp(50.0, 95.0).toDouble();
+  }
+
+  String _normalizeThemeMode(String raw) {
+    final normalized = raw.trim().toLowerCase();
+    if (normalized == 'dark') {
+      return 'dark';
+    }
+    return 'light';
   }
 }

@@ -5,13 +5,29 @@ class AppTheme {
   const AppTheme._();
 
   static ThemeData light() {
-    const tokens = AppThemeTokens.light();
+    return _build(const AppThemeTokens.light());
+  }
 
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: tokens.accentStrong,
-      brightness: Brightness.light,
-      surface: tokens.surfacePrimary,
-    );
+  static ThemeData dark() {
+    return _build(const AppThemeTokens.dark());
+  }
+
+  static ThemeData _build(AppThemeTokens tokens) {
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: tokens.accentStrong,
+          brightness: tokens.brightness,
+          surface: tokens.surfacePrimary,
+        ).copyWith(
+          primary: tokens.accentStrong,
+          onPrimary: tokens.onAccentStrong,
+          surface: tokens.surfacePrimary,
+          onSurface: tokens.textPrimary,
+          error: tokens.warningStrong,
+          onError: Colors.white,
+          outline: tokens.borderSubtle,
+          shadow: tokens.shadowColor,
+        );
     final textTheme = GoogleFonts.manropeTextTheme(
       TextTheme(
         headlineMedium: TextStyle(
@@ -48,7 +64,7 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: tokens.backgroundCanvas,
       textTheme: textTheme,
-      extensions: const <ThemeExtension<dynamic>>[tokens],
+      extensions: <ThemeExtension<dynamic>>[tokens],
       cardTheme: CardThemeData(
         color: tokens.surfacePrimary,
         surfaceTintColor: Colors.transparent,
@@ -96,20 +112,30 @@ class AppTheme {
         space: 1,
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        foregroundColor: tokens.textPrimary,
+        foregroundColor: tokens.onAccentStrong,
         backgroundColor: tokens.accentStrong,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: tokens.accentStrong,
+          foregroundColor: tokens.onAccentStrong,
+          disabledBackgroundColor: tokens.surfaceElevated,
+          disabledForegroundColor: tokens.textTertiary,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
         ),
       ),
       switchTheme: SwitchThemeData(
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return tokens.textPrimary;
+            return Colors.white;
           }
-          return Colors.white;
+          return tokens.surfacePrimary;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -170,6 +196,7 @@ class AppTheme {
 @immutable
 class AppThemeTokens extends ThemeExtension<AppThemeTokens> {
   const AppThemeTokens({
+    required this.brightness,
     required this.backgroundCanvas,
     required this.surfacePrimary,
     required this.surfaceSecondary,
@@ -186,7 +213,8 @@ class AppThemeTokens extends ThemeExtension<AppThemeTokens> {
   });
 
   const AppThemeTokens.light()
-    : backgroundCanvas = const Color(0xFFF4F6FB),
+    : brightness = Brightness.light,
+      backgroundCanvas = const Color(0xFFF4F6FB),
       surfacePrimary = const Color(0xFFFFFFFF),
       surfaceSecondary = const Color(0xFFF1F4F8),
       surfaceElevated = const Color(0xFFE6EBF3),
@@ -200,6 +228,23 @@ class AppThemeTokens extends ThemeExtension<AppThemeTokens> {
       warningSoft = const Color(0xFFFFE8E5),
       shadowColor = const Color(0x160D2340);
 
+  const AppThemeTokens.dark()
+    : brightness = Brightness.dark,
+      backgroundCanvas = const Color(0xFF09111A),
+      surfacePrimary = const Color(0xFF0E1723),
+      surfaceSecondary = const Color(0xFF151F2C),
+      surfaceElevated = const Color(0xFF1C2735),
+      borderSubtle = const Color(0xFF213042),
+      textPrimary = const Color(0xFFF4F7FF),
+      textSecondary = const Color(0xFF9CA9C5),
+      textTertiary = const Color(0xFF738099),
+      accentStrong = const Color(0xFFB8F72C),
+      accentSoft = const Color(0xFF233115),
+      warningStrong = const Color(0xFFFF4A44),
+      warningSoft = const Color(0xFF351718),
+      shadowColor = const Color(0x14000912);
+
+  final Brightness brightness;
   final Color backgroundCanvas;
   final Color surfacePrimary;
   final Color surfaceSecondary;
@@ -214,8 +259,80 @@ class AppThemeTokens extends ThemeExtension<AppThemeTokens> {
   final Color warningSoft;
   final Color shadowColor;
 
+  bool get isDark => brightness == Brightness.dark;
+
+  Color get onAccentStrong => isDark ? backgroundCanvas : textPrimary;
+  Color get accentInk =>
+      isDark ? const Color(0xFF89D61A) : const Color(0xFF5F950D);
+  Color get accentInkStrong =>
+      isDark ? const Color(0xFF98EA1B) : const Color(0xFF69A80D);
+  Color get progressTrack =>
+      isDark ? surfaceSecondary : const Color(0xFFD9E0EB);
+  Color get progressCap =>
+      isDark ? const Color(0xFFDDFB8C) : const Color(0xFFDDFB8C);
+  Color get warningProgressCap =>
+      isDark ? warningStrong.withValues(alpha: 0.72) : const Color(0xFFFFC9C6);
+  Color get heroIconSurface => isDark
+      ? surfaceSecondary.withValues(alpha: 0.9)
+      : Colors.white.withValues(alpha: 0.94);
+  Color get pillSurface => isDark
+      ? surfaceSecondary.withValues(alpha: 0.96)
+      : Colors.white.withValues(alpha: 0.9);
+  Color get avatarSurface =>
+      isDark ? const Color(0xFF131D2A) : const Color(0xFF20242C);
+  Color get avatarIconColor => isDark ? accentStrong : const Color(0xFFFFD658);
+  Color get overlayStroke => isDark
+      ? Colors.white.withValues(alpha: 0.12)
+      : Colors.white.withValues(alpha: 0.58);
+  Color get overlayHighlightStrong => isDark
+      ? Colors.white.withValues(alpha: 0.12)
+      : Colors.white.withValues(alpha: 0.22);
+  Color get overlayHighlightSoft => isDark
+      ? Colors.white.withValues(alpha: 0.02)
+      : Colors.white.withValues(alpha: 0.02);
+  Color get scrimColor => isDark
+      ? Colors.black.withValues(alpha: 0.42)
+      : Colors.black.withValues(alpha: 0.24);
+  Color get hardModeBadgeBackground => isDark ? surfaceSecondary : textPrimary;
+  Color get hardModeBadgeText => isDark ? textPrimary : Colors.white;
+  Color get hardModeBadgeIcon => isDark ? accentStrong : Colors.white;
+  Color get actionIconTintSurface => isDark
+      ? backgroundCanvas.withValues(alpha: 0.18)
+      : Colors.white.withValues(alpha: 0.34);
+
+  List<Color> heroGradientColors({Color? glowColor}) {
+    final baseGlow = glowColor ?? accentSoft;
+    if (isDark) {
+      return [
+        baseGlow.withValues(alpha: 0.95),
+        surfacePrimary.withValues(alpha: 0.98),
+        surfacePrimary,
+      ];
+    }
+    return [
+      baseGlow.withValues(alpha: 0.95),
+      Colors.white.withValues(alpha: 0.97),
+      Colors.white,
+    ];
+  }
+
+  List<Color> positiveProgressGradientColors() {
+    if (isDark) {
+      return const [Color(0xFF98EA1B), Color(0xFFC9F96E)];
+    }
+    return const [Color(0xFF98EA1B), Color(0xFFC9F96E)];
+  }
+
+  List<Color> warningProgressGradientColors() {
+    if (isDark) {
+      return [warningStrong, const Color(0xFFFF7B75)];
+    }
+    return const [Color(0xFFF46B66), Color(0xFFFFA19C)];
+  }
+
   @override
   AppThemeTokens copyWith({
+    Brightness? brightness,
     Color? backgroundCanvas,
     Color? surfacePrimary,
     Color? surfaceSecondary,
@@ -231,6 +348,7 @@ class AppThemeTokens extends ThemeExtension<AppThemeTokens> {
     Color? shadowColor,
   }) {
     return AppThemeTokens(
+      brightness: brightness ?? this.brightness,
       backgroundCanvas: backgroundCanvas ?? this.backgroundCanvas,
       surfacePrimary: surfacePrimary ?? this.surfacePrimary,
       surfaceSecondary: surfaceSecondary ?? this.surfaceSecondary,
@@ -253,9 +371,18 @@ class AppThemeTokens extends ThemeExtension<AppThemeTokens> {
       return this;
     }
     return AppThemeTokens(
-      backgroundCanvas: Color.lerp(backgroundCanvas, other.backgroundCanvas, t)!,
+      brightness: t < 0.5 ? brightness : other.brightness,
+      backgroundCanvas: Color.lerp(
+        backgroundCanvas,
+        other.backgroundCanvas,
+        t,
+      )!,
       surfacePrimary: Color.lerp(surfacePrimary, other.surfacePrimary, t)!,
-      surfaceSecondary: Color.lerp(surfaceSecondary, other.surfaceSecondary, t)!,
+      surfaceSecondary: Color.lerp(
+        surfaceSecondary,
+        other.surfaceSecondary,
+        t,
+      )!,
       surfaceElevated: Color.lerp(surfaceElevated, other.surfaceElevated, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
@@ -272,5 +399,6 @@ class AppThemeTokens extends ThemeExtension<AppThemeTokens> {
 
 extension AppThemeTokensLookup on BuildContext {
   AppThemeTokens get appThemeTokens =>
-      Theme.of(this).extension<AppThemeTokens>() ?? const AppThemeTokens.light();
+      Theme.of(this).extension<AppThemeTokens>() ??
+      const AppThemeTokens.light();
 }

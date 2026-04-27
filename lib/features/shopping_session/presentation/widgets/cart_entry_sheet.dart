@@ -536,7 +536,7 @@ Future<SessionCartItem?> showCartEntrySheet(
                                     },
                               style: FilledButton.styleFrom(
                                 backgroundColor: tokens.accentStrong,
-                                foregroundColor: tokens.textPrimary,
+                                foregroundColor: tokens.onAccentStrong,
                                 disabledBackgroundColor: tokens.surfaceElevated,
                                 disabledForegroundColor: tokens.textTertiary,
                                 minimumSize: const Size.fromHeight(54),
@@ -550,7 +550,7 @@ Future<SessionCartItem?> showCartEntrySheet(
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: exceedsHardLimit
                                       ? tokens.textTertiary
-                                      : tokens.textPrimary,
+                                      : tokens.onAccentStrong,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -664,11 +664,7 @@ class _EntryHeroCard extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(0.88, -0.08),
           radius: 1.1,
-          colors: [
-            tokens.accentSoft.withValues(alpha: 0.95),
-            Colors.white.withValues(alpha: 0.97),
-            Colors.white,
-          ],
+          colors: tokens.heroGradientColors(),
           stops: const [0.0, 0.42, 1.0],
         ),
       ),
@@ -719,7 +715,7 @@ class _EntryHeroCard extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.94),
+              color: tokens.heroIconSurface,
               shape: BoxShape.circle,
               border: Border.all(color: tokens.borderSubtle),
             ),
@@ -749,7 +745,7 @@ class _EntryTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
+        color: tokens.pillSurface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: tokens.borderSubtle),
       ),
@@ -938,7 +934,7 @@ class _EntrySegmentButton extends StatelessWidget {
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: tokens.textPrimary,
+                color: selected ? tokens.onAccentStrong : tokens.textPrimary,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -968,7 +964,7 @@ class _EntryImpactCard extends StatelessWidget {
     final tokens = context.appThemeTokens;
     final accentColor = exceedsHardLimit
         ? tokens.warningStrong
-        : const Color(0xFF69A80D);
+        : tokens.accentInkStrong;
 
     return Container(
       width: double.infinity,
@@ -987,12 +983,9 @@ class _EntryImpactCard extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(0.9, -0.06),
           radius: 1.05,
-          colors: [
-            (exceedsHardLimit ? tokens.warningSoft : tokens.accentSoft)
-                .withValues(alpha: 0.95),
-            Colors.white.withValues(alpha: 0.97),
-            Colors.white,
-          ],
+          colors: tokens.heroGradientColors(
+            glowColor: exceedsHardLimit ? tokens.warningSoft : tokens.accentSoft,
+          ),
           stops: const [0.0, 0.42, 1.0],
         ),
       ),
@@ -1023,7 +1016,7 @@ class _EntryImpactCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
             child: Stack(
               children: [
-                Container(height: 14, color: const Color(0xFFD9E0EB)),
+                Container(height: 14, color: tokens.progressTrack),
                 FractionallySizedBox(
                   widthFactor: progress.clamp(0.0, 1.0).toDouble(),
                   child: Container(
@@ -1032,8 +1025,8 @@ class _EntryImpactCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(999),
                       gradient: LinearGradient(
                         colors: exceedsHardLimit
-                            ? const [Color(0xFFF46B66), Color(0xFFFFA19C)]
-                            : const [Color(0xFF98EA1B), Color(0xFFC9F96E)],
+                            ? tokens.warningProgressGradientColors()
+                            : tokens.positiveProgressGradientColors(),
                       ),
                     ),
                   ),

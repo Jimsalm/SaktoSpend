@@ -47,8 +47,8 @@ class BudgetAllocationCard extends StatelessWidget {
     final iconColor = isInactive ? tokens.textTertiary : tokens.textPrimary;
     final barValueColor = isInactive
         ? tokens.textTertiary
-        : const Color(0xFF93E71A);
-    final barTrackColor = const Color(0xFFD9E0EB);
+        : tokens.accentStrong;
+    final barTrackColor = tokens.progressTrack;
     final leftColor = isInactive
         ? tokens.textTertiary
         : isNegativeLeft

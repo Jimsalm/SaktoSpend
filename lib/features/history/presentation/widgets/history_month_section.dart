@@ -173,7 +173,7 @@ class _HistoryItemCard extends StatelessWidget {
                                 ? tokens.accentSoft
                                 : tokens.surfaceSecondary,
                             foregroundColor: item.isActive
-                                ? const Color(0xFF5F950D)
+                                ? tokens.accentInk
                                 : tokens.textSecondary,
                           ),
                         ],
@@ -202,7 +202,7 @@ class _HistoryItemCard extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.arrow_forward_rounded,
-                        color: tokens.textPrimary,
+                        color: tokens.onAccentStrong,
                         size: 18,
                       ),
                     ),

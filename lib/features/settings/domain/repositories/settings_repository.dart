@@ -5,6 +5,8 @@ abstract class SettingsRepository {
   Future<void> saveUserProfile(UserProfile profile);
   Future<String> getCurrencyCode();
   Future<void> saveCurrencyCode(String currencyCode);
+  Future<String> getThemeMode();
+  Future<void> saveThemeMode(String themeMode);
   Future<bool> getHardBudgetMode();
   Future<void> saveHardBudgetMode(bool enabled);
   Future<bool> getSpendingThresholdAlertsEnabled();

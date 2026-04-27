@@ -69,10 +69,10 @@ class EmptyCartPlaceholder extends StatelessWidget {
                     color: tokens.surfaceSecondary,
                     borderRadius: BorderRadius.circular(compact ? 20 : 22),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.shopping_basket_outlined,
                     size: 40,
-                    color: Color(0xFF69A80D),
+                    color: tokens.accentInkStrong,
                   ),
                 ),
               ],

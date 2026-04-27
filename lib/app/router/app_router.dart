@@ -445,7 +445,7 @@ class _DarkFab extends StatelessWidget {
           decoration: BoxDecoration(
             color: tokens.accentStrong,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
+            border: Border.all(color: tokens.overlayStroke),
             boxShadow: [
               BoxShadow(
                 blurRadius: 18,
@@ -465,8 +465,8 @@ class _DarkFab extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Colors.white.withValues(alpha: 0.22),
-                        Colors.white.withValues(alpha: 0.02),
+                        tokens.overlayHighlightStrong,
+                        tokens.overlayHighlightSoft,
                       ],
                     ),
                   ),
@@ -475,7 +475,7 @@ class _DarkFab extends StatelessWidget {
               Center(
                 child: Icon(
                   Icons.add_rounded,
-                  color: tokens.textPrimary,
+                  color: tokens.onAccentStrong,
                   size: 30,
                 ),
               ),
@@ -571,7 +571,9 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = context.appThemeTokens;
-    final foregroundColor = selected ? tokens.textPrimary : tokens.textSecondary;
+    final foregroundColor = selected
+        ? tokens.onAccentStrong
+        : tokens.textSecondary;
 
     return Material(
       color: Colors.transparent,
@@ -587,7 +589,7 @@ class _NavItem extends StatelessWidget {
             color: selected ? tokens.accentStrong : Colors.transparent,
             borderRadius: BorderRadius.circular(18),
             border: selected
-                ? Border.all(color: Colors.white.withValues(alpha: 0.58))
+                ? Border.all(color: tokens.overlayStroke)
                 : null,
             boxShadow: selected
                 ? [

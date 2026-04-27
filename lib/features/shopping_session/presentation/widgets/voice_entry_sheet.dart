@@ -201,11 +201,7 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
                         gradient: RadialGradient(
                           center: const Alignment(0.88, -0.08),
                           radius: 1.1,
-                          colors: [
-                            tokens.accentSoft.withValues(alpha: 0.95),
-                            Colors.white.withValues(alpha: 0.97),
-                            Colors.white,
-                          ],
+                          colors: tokens.heroGradientColors(),
                           stops: const [0.0, 0.42, 1.0],
                         ),
                       ),
@@ -260,7 +256,7 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
                             width: 60,
                             height: 60,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.94),
+                              color: tokens.heroIconSurface,
                               shape: BoxShape.circle,
                               border: Border.all(color: tokens.borderSubtle),
                             ),
@@ -392,11 +388,11 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
                           height: 108,
                           decoration: BoxDecoration(
                             color: isListening
-                                ? tokens.textPrimary
+                                ? tokens.surfacePrimary
                                 : tokens.accentStrong,
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: tokens.overlayStroke,
                               width: 4,
                             ),
                             boxShadow: [
@@ -411,8 +407,8 @@ Future<VoiceEntryDraft?> showVoiceCaptureSheet(BuildContext context) async {
                             Icons.mic_rounded,
                             size: 40,
                             color: isListening
-                                ? Colors.white
-                                : tokens.textPrimary,
+                                ? tokens.textPrimary
+                                : tokens.onAccentStrong,
                           ),
                         ),
                       ),
@@ -544,7 +540,7 @@ class _VoiceTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
+        color: tokens.pillSurface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: tokens.borderSubtle),
       ),

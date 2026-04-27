@@ -132,11 +132,9 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF20242C),
+                  color: tokens.avatarSurface,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.08),
-                  ),
+                  border: Border.all(color: tokens.borderSubtle),
                   boxShadow: [
                     BoxShadow(
                       color: tokens.shadowColor,
@@ -145,9 +143,9 @@ class _BudgetsTabScreenState extends ConsumerState<BudgetsTabScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person,
-                  color: Color(0xFFFFD658),
+                  color: tokens.avatarIconColor,
                   size: 30,
                 ),
               ),
@@ -859,7 +857,7 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
                         onPressed: _onSubmit,
                         style: FilledButton.styleFrom(
                           backgroundColor: tokens.accentStrong,
-                          foregroundColor: tokens.textPrimary,
+                          foregroundColor: tokens.onAccentStrong,
                           minimumSize: const Size.fromHeight(54),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
@@ -869,7 +867,7 @@ class _BudgetFormDialogState extends State<_BudgetFormDialog> {
                         child: Text(
                           isEditing ? 'Save Budget' : 'Create Budget',
                           style: theme.textTheme.titleMedium?.copyWith(
-                            color: tokens.textPrimary,
+                            color: tokens.onAccentStrong,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -1015,11 +1013,7 @@ class _BudgetFormHeroCard extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(0.88, -0.08),
           radius: 1.1,
-          colors: [
-            tokens.accentSoft.withValues(alpha: 0.95),
-            Colors.white.withValues(alpha: 0.97),
-            Colors.white,
-          ],
+          colors: tokens.heroGradientColors(),
           stops: const [0.0, 0.42, 1.0],
         ),
       ),
@@ -1073,7 +1067,7 @@ class _BudgetFormHeroCard extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.94),
+              color: tokens.heroIconSurface,
               shape: BoxShape.circle,
               border: Border.all(color: tokens.borderSubtle),
             ),
@@ -1103,7 +1097,7 @@ class _HeroTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
+        color: tokens.pillSurface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: tokens.borderSubtle),
       ),

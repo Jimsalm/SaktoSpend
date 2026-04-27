@@ -264,18 +264,23 @@ class _SessionHeaderBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: tokens.textPrimary,
+        color: tokens.hardModeBadgeBackground,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: tokens.borderSubtle),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.shield_rounded, size: 16, color: Colors.white),
+          Icon(
+            Icons.shield_rounded,
+            size: 16,
+            color: tokens.hardModeBadgeIcon,
+          ),
           const SizedBox(width: 8),
           Text(
             'HARD MODE ON',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: tokens.hardModeBadgeText,
               letterSpacing: 0.8,
               fontWeight: FontWeight.w700,
             ),
@@ -315,7 +320,7 @@ class _SessionPrimaryActionButton extends StatelessWidget {
               : tokens.accentStrong,
           foregroundColor: disabled
               ? tokens.textTertiary
-              : tokens.textPrimary,
+              : tokens.onAccentStrong,
           padding: const EdgeInsets.symmetric(horizontal: 18),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),

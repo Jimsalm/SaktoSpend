@@ -495,41 +495,60 @@ class _MainBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 84,
-      padding: const EdgeInsets.fromLTRB(8, 6, 8, 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF7F6F3),
-        border: Border(top: BorderSide(color: Color(0xFFE0DDD7))),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _NavItem(
-            icon: Icons.home_rounded,
-            label: 'Home',
-            selected: currentIndex == 0,
-            onTap: () => onTap(0),
-          ),
-          _NavItem(
-            icon: Icons.account_balance_wallet_outlined,
-            label: 'Budgets',
-            selected: currentIndex == 1,
-            onTap: () => onTap(1),
-          ),
-          _NavItem(
-            icon: Icons.history,
-            label: 'History',
-            selected: currentIndex == 2,
-            onTap: () => onTap(2),
-          ),
-          _NavItem(
-            icon: Icons.settings_outlined,
-            label: 'Settings',
-            selected: currentIndex == 3,
-            onTap: () => onTap(3),
-          ),
-        ],
+    final tokens = context.appThemeTokens;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
+        decoration: BoxDecoration(
+          color: tokens.surfacePrimary,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(color: tokens.borderSubtle),
+          boxShadow: [
+            BoxShadow(
+              color: tokens.shadowColor,
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _NavItem(
+                icon: Icons.home_rounded,
+                label: 'Home',
+                selected: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+            ),
+            Expanded(
+              child: _NavItem(
+                icon: Icons.account_balance_wallet_outlined,
+                label: 'Budgets',
+                selected: currentIndex == 1,
+                onTap: () => onTap(1),
+              ),
+            ),
+            Expanded(
+              child: _NavItem(
+                icon: Icons.history_rounded,
+                label: 'History',
+                selected: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
+            ),
+            Expanded(
+              child: _NavItem(
+                icon: Icons.settings_outlined,
+                label: 'Settings',
+                selected: currentIndex == 3,
+                onTap: () => onTap(3),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -550,29 +569,56 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor = const Color(0xFF121212);
-    final normalColor = const Color(0xFF9B978F);
-    final color = selected ? selectedColor : normalColor;
+    final theme = Theme.of(context);
+    final tokens = context.appThemeTokens;
+    final foregroundColor = selected ? tokens.textPrimary : tokens.textSecondary;
 
-    return SizedBox(
-      width: 64,
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(18),
         onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Icon(icon, color: color, size: 21),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: color,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          height: 68,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: selected ? tokens.accentStrong : Colors.transparent,
+            borderRadius: BorderRadius.circular(18),
+            border: selected
+                ? Border.all(color: Colors.white.withValues(alpha: 0.58))
+                : null,
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: tokens.shadowColor,
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: foregroundColor, size: 22),
+              const SizedBox(height: 6),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                    color: foregroundColor,
+                    letterSpacing: 1.0,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

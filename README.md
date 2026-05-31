@@ -95,3 +95,7 @@ lib/
 - The project is Android-first.
 - Core budget tracking works offline.
 - The broader product plan lives in `docs/shopping_budget_tracker_plan.md`.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE.md).
